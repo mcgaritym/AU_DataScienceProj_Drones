@@ -1,0 +1,72 @@
+---
+title: "AU Data Science Project:  Drones"
+output:
+  pdf_document: default
+  html_document: default
+names: TBD 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+```{r cars}
+library(tidyverse)
+library(readxl)
+library(dplyr)
+
+data1 <- read_excel("FY2018_Q1_UAS_Sightings.xlsx")
+data2 <- read_excel("FY2018_Q2_UAS_Sightings.xlsx")
+data3 <- read_excel("FY2018_Q3_UAS_Sightings.xlsx")
+data4 <- read_excel("FY2018_Q4_UAS_Sightings.xlsx")
+data5 <- read_excel("FY2019_Q1_UAS_Sightings.xlsx")
+data6 <- read_excel("FY2019_Q2_UAS_Sightings.xlsx")
+data7 <- read_excel("FY2019_Q3_UAS_Sightings.xlsx")
+
+dataA <- bind_rows(data1, data2)
+dataB <- bind_rows(dataA, data3)
+dataC <- bind_rows(dataB, data4)
+dataD <- bind_rows(dataC, data5)
+dataE <- bind_rows(dataD, data6)
+dataF <- bind_rows(dataE, data7)
+
+head(data1)
+tail(dataF)
+
+# 
+# data("gss_cat")
+# # dim(gss_cat)
+# 
+# #NUMBER 1
+# arrange(gss_cat, -tvhours) 
+# 
+# #NUMBER 2
+# mutate(gss_cat, birthyear = year - age)
+# summary(gss_cat$birthyear)
+# dim(gss_cat)
+# 
+# #NUMBER 3
+# df_gss_cat_tv <- filter(gss_cat, tvhours > 3)
+# 
+# #NUMBER 4
+# mutate(gss_cat, mean1 = )
+# summarise(gss_cat,mean1)
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
