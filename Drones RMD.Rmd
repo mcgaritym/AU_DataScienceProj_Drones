@@ -22,6 +22,7 @@ library(tidyverse)
 library(readxl)
 library(dplyr)
 library(DescTools)
+library(ggplot2)
 
 data1 <- read_excel("FY2019_Q3_UAS_Sightings.xlsx")
 names(data1)[1] <- "Date"
@@ -119,6 +120,27 @@ data15$Date <- as.Date(data15$Date, "%Y-%m-%d")
 dataN <- bind_rows(dataM, data15)
 data16$Date <- as.Date(data16$Date, "%Y-%m-%d")
 dataO <- bind_rows(dataN, data16)
+
+dataO$State <- toupper(dataO$State)
+dataO$State <- gsub('LOUISANA', 'LOUISIANA', dataO$State)
+dataO <- dataO[dataO$State != "PUERTO RICO",]
+#dataO <- dataO[dataO$State != "DISTRICT OF COLUMBIA",]
+dataO <- dataO[dataO$State != "U.S. VIRGIN ISLANDS",]
+dataO <- dataO[dataO$State != "CANADA",]
+dataO <- dataO[dataO$State != "NORTHERN MARIANA ISLANDS",]
+dataO <- subset(dataO, dataO$State != "")
+
+#unique_states <- unique(dataO$State)
+#length(unique_states)
+#unique_states <- sort(unique_states)
+#StatesCOUNT <- table(dataO$State, useNA="ifany")
+
+state_sort <- sort(table(dataO$State))
+date_sort <- sort(table(dataO$Date))
+plot(state_sort, ylab="Number of Sightings", cex.lab = 0.8, cex.axis = 0.5, las = 2) 
+
+#dataO["Count"] <- 1
+
 
 ```
 
