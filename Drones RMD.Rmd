@@ -1,0 +1,133 @@
+---
+title: "AU Data Science Project:  Drones"
+output:
+  pdf_document: default
+  html_document: default
+names: TBD 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+```{r cars}
+library(tidyverse)
+library(readxl)
+library(dplyr)
+library(DescTools)
+
+data1 <- read_excel("FY2019_Q3_UAS_Sightings.xlsx")
+names(data1)[1] <- "Date"
+
+data2 <- read_excel("FY2019_Q2_UAS_Sightings.xlsx")
+names(data2)[1] <- "Date"
+
+data3 <- read_excel("FY2019_Q1_UAS_Sightings.xlsx")
+names(data3)[1] <- "Date"
+
+data4 <- read_excel("FY2018_Q4_UAS_Sightings.xlsx")
+names(data4)[1] <- "Date"
+
+data5 <- read_excel("FY2018_Q3_UAS_Sightings.xlsx")
+names(data5)[1] <- "Date"
+
+data6 <- read_excel("FY2018_Q2_UAS_Sightings.xlsx")
+names(data6)[1] <- "Date"
+
+data7 <- read_excel("FY2018_Q1_UAS_Sightings.xlsx")
+names(data7)[1] <- "Date"
+
+data8 <- read_excel("FY2017_Q4_De-identification_Redaction_11192017.xlsx")
+names(data8)[1] <- "Date"
+names(data8)[2] <- "Summary"
+
+data9 <- read_excel("UAS_sightings_report_Apr_Jun2017.xlsx")
+names(data9)[1] <- "Date"
+data9$Date <- as.Date(data9$Date, "%B %d, %Y")
+
+data10 <- read_excel("UAS_sightings_report_Jan_Mar2017.xlsx")
+names(data10)[1] <- "Date"
+data10$Date <- as.Date(data10$Date, "%m/%d/%Y")
+
+data11 <- read_excel("UAS_sightings_report_170331.xlsx")
+names(data11)[1] <- "Date"
+names(data11)[2] <- "City"
+names(data11)[3] <- "State"
+names(data11)[4] <- "Summary"
+data11 <- data11[-c(5:8)]
+
+data12 <- read_excel("UAS_Sightings_report_1Jul-30Sep16.xlsx")
+names(data12)[1] <- "Date"
+names(data12)[2] <- "City"
+names(data12)[3] <- "State"
+names(data12)[4] <- "Summary"
+
+data13 <- read_excel("UAS_Sightings_report_1Apr-30Jun16.xlsx")
+names(data13)[1] <- "Date"
+names(data13)[2] <- "City"
+names(data13)[3] <- "State"
+names(data13)[4] <- "Summary"
+data13$Date <- as.numeric(data13$Date)
+data13$Date <- XLDateToPOSIXct(data13$Date)
+
+data14 <- read_excel("UAS_Sightings_report_1Feb-31Mar16.xlsx")
+names(data14)[1] <- "Date"
+names(data14)[2] <- "Summary"
+names(data14)[3] <- "City"
+names(data14)[4] <- "State"
+
+data15 <- read_excel("UAS_Sightings_report_21Aug-31Jan.xlsx")
+names(data15)[1] <- "Date"
+names(data15)[2] <- "Summary"
+names(data15)[3] <- "City"
+names(data15)[4] <- "State"
+
+data16 <- read_excel("UASEventsNov2014-Aug2015.xls")
+names(data16)[1] <- "Date"
+names(data16)[2] <- "City"
+names(data16)[3] <- "State"
+names(data16)[4] <- "Summary"
+data16 <- data16[-c(5:6)]
+
+
+dataA <- bind_rows(data1, data2)
+dataB <- bind_rows(dataA, data3)
+dataC <- bind_rows(dataB, data4)
+dataD <- bind_rows(dataC, data5)
+dataE <- bind_rows(dataD, data6)
+dataF <- bind_rows(dataE, data7)
+dataG <- bind_rows(dataF, data8)
+dataG$Date <- as.Date(dataG$Date, "%Y-%m-%d")
+dataH <- bind_rows(dataG, data9)
+dataI <- bind_rows(dataH, data10)
+data11$Date <- as.Date(data11$Date, "%Y-%m-%d")
+dataJ <- bind_rows(dataI, data11)
+data12$Date <- as.Date(data12$Date, "%Y-%m-%d")
+dataK <- bind_rows(dataJ, data12)
+data13$Date <- as.Date(data13$Date, "%Y-%m-%d")
+dataL <- bind_rows(dataK, data13)
+data14$Date <- as.Date(data14$Date, "%Y-%m-%d")
+dataM <- bind_rows(dataL, data14)
+data15$Date <- as.Date(data15$Date, "%Y-%m-%d")
+dataN <- bind_rows(dataM, data15)
+data16$Date <- as.Date(data16$Date, "%Y-%m-%d")
+dataO <- bind_rows(dataN, data16)
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
