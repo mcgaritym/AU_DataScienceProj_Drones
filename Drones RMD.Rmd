@@ -23,9 +23,26 @@ library(readxl)
 library(dplyr)
 library(DescTools)
 library(ggplot2)
+library(tidyr)
+library(stringr)
+
 
 data1 <- read_excel("FY2019_Q3_UAS_Sightings.xlsx")
 names(data1)[1] <- "Date"
+
+
+#data1a <- read.table(data1$Summary, sep = "Date/Time", as.is = TRUE)
+
+
+#data1a <- cSplit(data1, 'Summary', sep="Date/Time", type.convert=FALSE)
+
+#data1a <- str_split(data1$Summary, "1234Z", 2)
+# TimeSplit1 <- str_split_fixed(data1$Summary, "Date/Time:", 2)
+# vec <- c(TimeSplit1[1], TimeSplit1[2])
+# as.list(vec)
+# typeof(vec)
+# typeof(data1)
+
 
 data2 <- read_excel("FY2019_Q2_UAS_Sightings.xlsx")
 names(data2)[1] <- "Date"
@@ -130,12 +147,29 @@ dataO <- dataO[dataO$State != "CANADA",]
 dataO <- dataO[dataO$State != "NORTHERN MARIANA ISLANDS",]
 dataO <- subset(dataO, dataO$State != "")
 
-#unique_states <- unique(dataO$State)
-#length(unique_states)
-#unique_states <- sort(unique_states)
-#StatesCOUNT <- table(dataO$State, useNA="ifany")
+pop_data <- read_excel("nst-est2019-01.xlsx")
+names(pop_data)[1] <- "State"
+names(pop_data)[2] <- "Population"
 
-state_sort <- sort(table(dataO$State))
+unique_states <- unique(dataO$State)
+unique_states <- sort(unique_states)
+StatesCOUNT <- data.frame(unclass(table(dataO$State, useNA = "ifany")))
+names(StatesCOUNT)[1] <- "Count"
+dataTOTAL <- bind_cols(pop_data, Count=StatesCOUNT$Count)
+
+dataTOTAL$Relative_Count<-dataTOTAL$Count/dataTOTAL$Population
+
+income_data <- read_excel("median_household_income_by_state_3yr_avg.xls")
+dataTOTAL <- bind_cols(dataTOTAL, income_data[6:56,2])
+names(dataTOTAL)[5] <- "Med_Income"
+
+#names(StatesCOUNT)[2] <- "Count"
+#StatesCOUNT <- as.data.frame(table(StatesCOUNT))
+
+#dataOa <- bind_rows(dataO, pop_data)
+#dataO$rel_pop_data <- dataO$*(1/pop_data$Population)
+#pop_data <- sort(table(pop_data$State))
+
 date_sort <- sort(table(dataO$Date))
 plot(state_sort, ylab="Number of Sightings", cex.lab = 0.8, cex.axis = 0.5, las = 2) 
 
@@ -149,7 +183,7 @@ plot(state_sort, ylab="Number of Sightings", cex.lab = 0.8, cex.axis = 0.5, las 
 You can also embed plots, for example:
 
 ```{r pressure, echo=FALSE}
-plot(pressure)
+#plot(pressure)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
