@@ -1,5 +1,5 @@
 ---
-title: "AU Data Science Project:  Drones"
+title: "AU Data Science Project: Drones"
 output:
   pdf_document: default
   html_document: default
@@ -10,7 +10,7 @@ names: TBD
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r library}
+```{r library, include=FALSE}
 library(tidyverse)
 library(readxl)
 library(dplyr)
@@ -31,65 +31,63 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 
-```{r combdata, include=FALSE}
+```{r comb_pop_data, include=FALSE}
 pop_data <- read_excel("data/Pop_Data/nst-est2019-01.xlsx")
 names(pop_data)[1] <- "State"
 names(pop_data)[2] <- "Population"
+```
 
+```{r comb_regis_data, include=FALSE}
 
-dataReg1 <- read_excel("data/Registrations_Data/Registrations-City-State-Country-Count-2015Q4-2018Q3.xlsx")
-names(dataReg1)[1] = "Year"
-names(dataReg1)[4] = "State"
-names(dataReg1)[7] = "RegistrationCount"
-dataReg1 <- dataReg1[dataReg1$Country == 'United States',]
-dataReg1 <- dataReg1[-c(2,5,6)]
-dataReg1 <- subset(dataReg1, dataReg1$State != "")
-dataReg1$State <- state.name[match(dataReg1$State,state.abb)]
-dataReg1$State[is.na(dataReg1$State)] <- "District of Columbia"
+regis_data1 <- read_excel("data/Registrations_Data/Registrations-City-State-Country-Count-2015Q4-2018Q3.xlsx")
+names(regis_data1)[1] = "Year"
+names(regis_data1)[4] = "State"
+names(regis_data1)[7] = "RegistrationCount"
+regis_data1 <- regis_data1[regis_data1$Country == 'United States',]
+regis_data1 <- regis_data1[-c(2,5,6)]
+regis_data1 <- subset(regis_data1, regis_data1$State != "")
+regis_data1$State <- state.name[match(regis_data1$State,state.abb)]
+regis_data1$State[is.na(regis_data1$State)] <- "District of Columbia"
 
+regis_data2 <- read_excel("data/Registrations_Data/Registrations-City-State-Country-Count-2019Q1.xlsx")
+names(regis_data2)[2] = "State"
+names(regis_data2)[5] = "RegistrationCount"
+regis_data2 <- regis_data2[regis_data2$Country == 'United States',]
+regis_data2 <- regis_data2[-c(3,4)]
+regis_data2 <- subset(regis_data2, regis_data2$State != "")
+regis_data2$State <- state.name[match(regis_data2$State,state.abb)]
+regis_data2$Year <- '2019'
+regis_data2$State[is.na(regis_data2$State)] <- "District of Columbia"
 
-dataReg2 <- read_excel("data/Registrations_Data/Registrations-City-State-Country-Count-2019Q1.xlsx")
-names(dataReg2)[2] = "State"
-names(dataReg2)[5] = "RegistrationCount"
-dataReg2 <- dataReg2[dataReg2$Country == 'United States',]
-dataReg2 <- dataReg2[-c(3,4)]
-dataReg2 <- subset(dataReg2, dataReg2$State != "")
-dataReg2$State <- state.name[match(dataReg2$State,state.abb)]
-dataReg2$Year <- '2019'
-dataReg2$State[is.na(dataReg2$State)] <- "District of Columbia"
+regis_data3 <- read_excel("data/Registrations_Data/Registrations-City-State-Country-Count-2019Q2.xlsx")
+names(regis_data3)[2] = "State"
+names(regis_data3)[5] = "RegistrationCount"
+regis_data3 <- regis_data3[regis_data3$Country == 'United States',]
+regis_data3 <- regis_data3[-c(3,4)]
+regis_data3 <- subset(regis_data3, regis_data3$State != "")
+regis_data3$State <- state.name[match(regis_data3$State,state.abb)]
+regis_data3$Year <- '2019'
+regis_data3$State[is.na(regis_data3$State)] <- "District of Columbia"
 
+regis_data4 <- read_excel("data/Registrations_Data/Registrations-City-State-Country-Count-2019Q3.xlsx")
+names(regis_data4)[2] = "State"
+names(regis_data4)[5] = "RegistrationCount"
+regis_data4 <- regis_data4[regis_data4$Country == 'United States',]
+regis_data4 <- regis_data4[-c(3,4)]
+regis_data4 <- subset(regis_data4, regis_data4$State != "")
+regis_data4$State <- state.name[match(regis_data4$State,state.abb)]
+regis_data4$Year <- '2019'
+regis_data4$State[is.na(regis_data4$State)] <- "District of Columbia"
 
-dataReg3 <- read_excel("data/Registrations_Data/Registrations-City-State-Country-Count-2019Q2.xlsx")
-names(dataReg3)[2] = "State"
-names(dataReg3)[5] = "RegistrationCount"
-dataReg3 <- dataReg3[dataReg3$Country == 'United States',]
-dataReg3 <- dataReg3[-c(3,4)]
-dataReg3 <- subset(dataReg3, dataReg3$State != "")
-dataReg3$State <- state.name[match(dataReg3$State,state.abb)]
-dataReg3$Year <- '2019'
-dataReg3$State[is.na(dataReg3$State)] <- "District of Columbia"
+regis_data1$Year <- as.character(regis_data1$Year)
+dataRegA <- bind_rows(regis_data1, regis_data2)
+dataRegB <- bind_rows(dataRegA, regis_data3)
+dataRegTOTAL <- bind_rows(dataRegB, regis_data4)
 
-
-dataReg4 <- read_excel("data/Registrations_Data/Registrations-City-State-Country-Count-2019Q3.xlsx")
-names(dataReg4)[2] = "State"
-names(dataReg4)[5] = "RegistrationCount"
-dataReg4 <- dataReg4[dataReg4$Country == 'United States',]
-dataReg4 <- dataReg4[-c(3,4)]
-dataReg4 <- subset(dataReg4, dataReg4$State != "")
-dataReg4$State <- state.name[match(dataReg4$State,state.abb)]
-dataReg4$Year <- '2019'
-dataReg4$State[is.na(dataReg4$State)] <- "District of Columbia"
-
-
-dataReg1$Year <- as.character(dataReg1$Year)
-dataRegA <- bind_rows(dataReg1, dataReg2)
-dataRegB <- bind_rows(dataRegA, dataReg3)
-dataRegTOTAL <- bind_rows(dataRegB, dataReg4)
 dataRegTOTAL2016 <- dataRegTOTAL[dataRegTOTAL$Year == "2016",]
 dataRegTOTAL2017 <- dataRegTOTAL[dataRegTOTAL$Year == "2017",]
 dataRegTOTAL2018 <- dataRegTOTAL[dataRegTOTAL$Year == "2018",]
 #dataRegTOTAL <- subset(dataRegTOTAL, dataRegTOTAL$State != "")
-
 
 Regunique_states2016 <- unique(dataRegTOTAL2016$State)
 Regunique_states2016 <- sort(Regunique_states2016)
@@ -115,12 +113,9 @@ dataRegTOTAL2018 <- bind_cols(pop_data, RegCOUNT2018)
 # names(RegCOUNT)[1] <- "TOTALRegCount"
 # dataRegTOTAL <- bind_cols(pop_data, RegCOUNT)
 dataRegTOTAL <- bind_cols(pop_data, RegCOUNT2016, RegCOUNT2017, RegCOUNT2018)
+```
 
-
-
-
-
-
+```{r comb_sight_data, include=FALSE}
 
 #drone sightings load data
 data1 <- read_excel("data/UAS_Sightings_Data/FY2019_Q3_UAS_Sightings.xlsx")
@@ -219,6 +214,9 @@ data15$Date <- as.Date(data15$Date, "%Y-%m-%d")
 dataN <- bind_rows(dataM, data15)
 data16$Date <- as.Date(data16$Date, "%Y-%m-%d")
 dataO <- bind_rows(dataN, data16)
+```
+
+```{r comb_data, include=FALSE}
 
 dataO$State <- toupper(dataO$State)
 dataO$State <- gsub('LOUISANA', 'LOUISIANA', dataO$State)
@@ -291,8 +289,8 @@ date_sort <- sort(table(dataO$Date))
 
 You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-#plot(pressure)
+```{r plotmap, echo=FALSE}
+#plot_usmap(data = dataTOTAL, values = "Count", color = "red") + scale_fill_continuous(low = "white", high = "red", name = "Drone Sightings Count", label = scales::comma) + theme(legend.position = "right")
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
