@@ -23,26 +23,78 @@ library(readxl)
 library(dplyr)
 library(DescTools)
 library(ggplot2)
+#library(usmap)
 library(tidyr)
 library(stringr)
+library(lubridate)
+library(datasets)
+
+pop_data <- read_excel("nst-est2019-01.xlsx")
+names(pop_data)[1] <- "State"
+names(pop_data)[2] <- "Population"
 
 
+
+dataReg1 <- read_excel("Registrations-City-State-Country-Count-2015Q4-2018Q3.xlsx")
+names(dataReg1)[1] = "Year"
+names(dataReg1)[4] = "State"
+names(dataReg1)[7] = "RegistrationCount"
+dataReg1 <- dataReg1[dataReg1$Country == 'United States',]
+dataReg1 <- dataReg1[-c(2,5,6)]
+dataReg1 <- subset(dataReg1, dataReg1$State != "")
+dataReg1$State <- state.name[match(dataReg1$State,state.abb)]
+dataReg1$State[is.na(dataReg1$State)] <- "District of Columbia"
+
+
+dataReg2 <- read_excel("Registrations-City-State-Country-Count-2019Q1.xlsx")
+names(dataReg2)[2] = "State"
+names(dataReg2)[5] = "RegistrationCount"
+dataReg2 <- dataReg2[dataReg2$Country == 'United States',]
+dataReg2 <- dataReg2[-c(3,4)]
+dataReg2 <- subset(dataReg2, dataReg2$State != "")
+dataReg2$State <- state.name[match(dataReg2$State,state.abb)]
+dataReg2$Year <- '2019'
+dataReg2$State[is.na(dataReg2$State)] <- "District of Columbia"
+
+
+dataReg3 <- read_excel("Registrations-City-State-Country-Count-2019Q2.xlsx")
+names(dataReg3)[2] = "State"
+names(dataReg3)[5] = "RegistrationCount"
+dataReg3 <- dataReg3[dataReg3$Country == 'United States',]
+dataReg3 <- dataReg3[-c(3,4)]
+dataReg3 <- subset(dataReg3, dataReg3$State != "")
+dataReg3$State <- state.name[match(dataReg3$State,state.abb)]
+dataReg3$Year <- '2019'
+dataReg3$State[is.na(dataReg3$State)] <- "District of Columbia"
+
+
+dataReg4 <- read_excel("Registrations-City-State-Country-Count-2019Q3.xlsx")
+names(dataReg4)[2] = "State"
+names(dataReg4)[5] = "RegistrationCount"
+dataReg4 <- dataReg4[dataReg4$Country == 'United States',]
+dataReg4 <- dataReg4[-c(3,4)]
+dataReg4 <- subset(dataReg4, dataReg4$State != "")
+dataReg4$State <- state.name[match(dataReg4$State,state.abb)]
+dataReg4$Year <- '2019'
+dataReg4$State[is.na(dataReg4$State)] <- "District of Columbia"
+
+
+dataReg1$Year <- as.character(dataReg1$Year)
+dataRegA <- bind_rows(dataReg1, dataReg2)
+dataRegB <- bind_rows(dataRegA, dataReg3)
+dataRegTOTAL <- bind_rows(dataRegB, dataReg4)
+#dataRegTOTAL <- subset(dataRegTOTAL, dataRegTOTAL$State != "")
+
+
+Regunique_states <- unique(dataRegTOTAL$State)
+Regunique_states <- sort(Regunique_states)
+RegCOUNT <- data.frame(unclass(table(dataRegTOTAL$State, useNA = "ifany")))
+names(RegCOUNT)[1] <- "RegCount"
+dataRegTOTAL <- bind_cols(pop_data, RegCOUNT)
+
+#drone sightings load data
 data1 <- read_excel("FY2019_Q3_UAS_Sightings.xlsx")
 names(data1)[1] <- "Date"
-
-
-#data1a <- read.table(data1$Summary, sep = "Date/Time", as.is = TRUE)
-
-
-#data1a <- cSplit(data1, 'Summary', sep="Date/Time", type.convert=FALSE)
-
-#data1a <- str_split(data1$Summary, "1234Z", 2)
-# TimeSplit1 <- str_split_fixed(data1$Summary, "Date/Time:", 2)
-# vec <- c(TimeSplit1[1], TimeSplit1[2])
-# as.list(vec)
-# typeof(vec)
-# typeof(data1)
-
 
 data2 <- read_excel("FY2019_Q2_UAS_Sightings.xlsx")
 names(data2)[1] <- "Date"
@@ -147,9 +199,9 @@ dataO <- dataO[dataO$State != "CANADA",]
 dataO <- dataO[dataO$State != "NORTHERN MARIANA ISLANDS",]
 dataO <- subset(dataO, dataO$State != "")
 
-pop_data <- read_excel("nst-est2019-01.xlsx")
-names(pop_data)[1] <- "State"
-names(pop_data)[2] <- "Population"
+data2016 <- subset(dataO, dataO$Date >= "2016-01-01" & dataO$Date <= "2016-12-31")
+data2017 <- subset(dataO, dataO$Date >= "2017-01-01" & dataO$Date <= "2017-12-31")
+data2018 <- subset(dataO, dataO$Date >= "2018-01-01" & dataO$Date <= "2018-12-31")
 
 unique_states <- unique(dataO$State)
 unique_states <- sort(unique_states)
@@ -162,6 +214,10 @@ dataTOTAL$Relative_Count<-dataTOTAL$Count/dataTOTAL$Population
 income_data <- read_excel("median_household_income_by_state_3yr_avg.xls")
 dataTOTAL <- bind_cols(dataTOTAL, income_data[6:56,2])
 names(dataTOTAL)[5] <- "Med_Income"
+dataTOTAL <- bind_cols(dataTOTAL, dataRegTOTAL[,3])
+names(dataTOTAL)[1] <- "State"
+names(dataTOTAL)[3] <- "SightingCount"
+
 
 #names(StatesCOUNT)[2] <- "Count"
 #StatesCOUNT <- as.data.frame(table(StatesCOUNT))
@@ -171,10 +227,12 @@ names(dataTOTAL)[5] <- "Med_Income"
 #pop_data <- sort(table(pop_data$State))
 
 date_sort <- sort(table(dataO$Date))
-plot(state_sort, ylab="Number of Sightings", cex.lab = 0.8, cex.axis = 0.5, las = 2) 
+#plot(state_sort, ylab="Number of Sightings", cex.lab = 0.8, cex.axis = 0.5, las = 2) 
 
-#dataO["Count"] <- 1
+#heatmap
 
+names(dataTOTAL)[1] <- "state"
+plot_usmap(data = dataTOTAL, values = "Count", color = "red") + scale_fill_continuous(low = "white", high = "red", name = "Drone Sightings Count", label = scales::comma) + theme(legend.position = "right")
 
 ```
 
