@@ -29,7 +29,7 @@ library(stringr)
 library(lubridate)
 library(datasets)
 
-pop_data <- read_excel("nst-est2019-01.xlsx")
+pop_data <- read_excel("Pop_Data/nst-est2019-01.xlsx")
 names(pop_data)[1] <- "State"
 names(pop_data)[2] <- "Population"
 
@@ -258,7 +258,7 @@ dataTOTAL2018s <- bind_cols(pop_data, StatesCOUNT2018s)
 
 dataTOTAL2016to2018 <- bind_cols(pop_data, StatesCOUNT2016s, StatesCOUNT2017s, StatesCOUNT2018s)
 
-income_data <- read_excel("median_household_income_by_state_3yr_avg.xls")
+income_data <- read_excel("Income_Data/median_household_income_by_state_3yr_avg.xls")
 dataTOTAL <- bind_cols(dataTOTAL2016to2018, income_data[6:56,2], dataRegTOTAL[,3:5])
 names(dataTOTAL)[6] <- "Med_Income"
 dataTOTAL
