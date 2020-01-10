@@ -88,7 +88,8 @@ dataRegTOTAL <- bind_rows(dataRegB, rdata4)
 
 #remove temporary registration data that have been combined
 rm(list = ls(pattern = "^rdata"))
-rm(list = ls(pattern = "^dataReg"))
+rm(dataRegA)
+rm(dataRegB)
 
 dataRegTOTAL2016 <- dataRegTOTAL[dataRegTOTAL$Year == "2016",]
 dataRegTOTAL2017 <- dataRegTOTAL[dataRegTOTAL$Year == "2017",]
@@ -259,6 +260,7 @@ dataTOTAL2016to2018 <- bind_cols(pop_data, StatesCOUNT2016s, StatesCOUNT2017s, S
 income_data <- read_excel("data/Income_Data/median_household_income_by_state_3yr_avg.xls")
 dataTOTAL <- bind_cols(dataTOTAL2016to2018, income_data[6:56,2], dataRegTOTAL[,3:5])
 names(dataTOTAL)[6] <- "Med_Income"
+dataTOTAL$Med_Income <- as.numeric(dataTOTAL$Med_Income)
 dataTOTAL
 
 dataTOTAL$TotalSightings <- dataTOTAL$SightCount2016 + dataTOTAL$SightCount2017 + dataTOTAL$SightCount2018
@@ -306,10 +308,14 @@ sight18 <- dataTOTAL$SightCount2018
 reg18 <- dataTOTAL$RegCount2018
 
 ggplot(data = dataTOTAL) +
-  geom_point(mapping = aes(x=(reg18/Population)*1000, y=(sight18/Population)*1000, color = "red"))
+  geom_point(mapping = aes(x=reg18, y=sight18, color = "red"))
 
 ggplot(data = dataTOTAL) +
-  geom_point(mapping = aes(x=reg18, y=sight18, color = "red"))
+  geom_point(mapping = aes(x=(reg18/Med_Income), y=(sight18/Med_Income), color = "red"))
+
+ggplot(data = dataTOTAL) +
+  geom_point(mapping = aes(x=(reg18/Population)*1000, y=(sight18/Population)*1000, color = "red"))
+
 
 #mean_sight = mean(sight16)
 #mean_reg = mean(reg16)
