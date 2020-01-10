@@ -305,6 +305,19 @@ date_sort <- sort(table(sight_all$Date))
 
 ```
 
+```{r kese}
+kese_tbl <- as_tibble(read_csv("data/Kauffman_Data/KESE - KESE Index - Data 1998-2018.csv"))
+
+kese_tbl <- kese_tbl %>%
+  select(region, 'zindex-2016', 'zindex-2017', 'zindex-2018') 
+
+kese_tbl <- kese_tbl[kese_tbl$region != "United States", ]
+
+dataTOTAL <- merge(dataTOTAL, kese_tbl, by.x = "State", by.y = "region", all=TRUE) 
+
+```
+
+
 ## Including Plots
 
 You can also embed plots, for example:
@@ -316,9 +329,13 @@ sight17 <- dataTOTAL$SightCount2017
 reg17 <- dataTOTAL$RegCount2017
 sight18 <- dataTOTAL$SightCount2018
 reg18 <- dataTOTAL$RegCount2018
+sTotal <- dataTOTAL$TotalSightings
+rTotal <- dataTOTAL$TotalRegs
+
+zindex18 <- dataTOTAL$`zindex-2018`
 
 ggplot(data = dataTOTAL) +
-  geom_point(mapping = aes(x=reg18, y=sight18, color = "red"))
+  geom_point(mapping = aes(x=reg18, y=zindex18, color = "red"))
 
 ggplot(data = dataTOTAL) +
   geom_point(mapping = aes(x=(reg18/Med_Income), y=(sight18/Med_Income), color = "red"))
@@ -326,6 +343,9 @@ ggplot(data = dataTOTAL) +
 ggplot(data = dataTOTAL) +
   geom_point(mapping = aes(x=(reg18/Population)*1000, y=(sight18/Population)*1000, color = "red"))
 
+summary(lm(sTotal ~ rTotal, data=dataTOTAL))
+summary(lm(sTotal ~ rTotal + Med_Income + Population + zindex18, data=dataTOTAL))
+summary(lm(rTotal ~ sTotal + Med_Income + Population + zindex18, data=dataTOTAL))
 
 #mean_sight = mean(sight16)
 #mean_reg = mean(reg16)
