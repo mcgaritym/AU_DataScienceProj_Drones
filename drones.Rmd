@@ -317,6 +317,29 @@ dataTOTAL <- merge(dataTOTAL, kese_tbl, by.x = "State", by.y = "region", all=TRU
 
 ```
 
+```{r weather}
+# # 
+# weather <- as_tibble(read_excel("data/Weather_Data/avg_annual_sun.xlsx"))
+# 
+# # Selects the state and number of 'clear days'
+# # no 'clear days' data for DC
+# weather <- weather %>%
+#   select(State, 'Clear Days')
+# 
+# dataTOTAL <- merge(dataTOTAL, weather, by.x = "State", by.y = "State", all=TRUE) 
+
+```
+
+```{r milken}
+
+milken18 <- as_tibble(read_excel("data/Milken_Data/2018_ranking.xlsx"))
+
+milken18 <- milken18 %>% select(State, Score)
+
+dataTOTAL <- merge(dataTOTAL, milken18, by.x = "State", by.y = "State", all=TRUE)
+
+```
+
 
 ## Including Plots
 
@@ -329,27 +352,27 @@ sight17 <- dataTOTAL$SightCount2017
 reg17 <- dataTOTAL$RegCount2017
 sight18 <- dataTOTAL$SightCount2018
 reg18 <- dataTOTAL$RegCount2018
+
 sTotal <- dataTOTAL$TotalSightings
 rTotal <- dataTOTAL$TotalRegs
-
 zindex18 <- dataTOTAL$`zindex-2018`
+milrank <- dataTOTAL$Score
 
-ggplot(data = dataTOTAL) +
-  geom_point(mapping = aes(x=reg18, y=zindex18, color = "red"))
+# ignore below: just testing stats
 
-ggplot(data = dataTOTAL) +
-  geom_point(mapping = aes(x=(reg18/Med_Income), y=(sight18/Med_Income), color = "red"))
+# ggplot(data = dataTOTAL) +
+#   geom_point(mapping = aes(x=milrank, y=sight18, color = "red"))
+# 
+# ggplot(data = dataTOTAL) +
+#   geom_point(mapping = aes(x=(reg18/Med_Income), y=(sight18/Med_Income), color = "red"))
+# 
+# ggplot(data = dataTOTAL) +
+#   geom_point(mapping = aes(x=(reg18/Population)*1000, y=(sight18/Population)*1000, color = "red"))
+# 
+# summary(lm(sTotal ~ rTotal, data=dataTOTAL))
+# 
+# summary(lm(sTotal ~ rTotal + Med_Income + Population + zindex18, data=dataTOTAL))
 
-ggplot(data = dataTOTAL) +
-  geom_point(mapping = aes(x=(reg18/Population)*1000, y=(sight18/Population)*1000, color = "red"))
-
-summary(lm(sTotal ~ rTotal, data=dataTOTAL))
-summary(lm(sTotal ~ rTotal + Med_Income + Population + zindex18, data=dataTOTAL))
-summary(lm(rTotal ~ sTotal + Med_Income + Population + zindex18, data=dataTOTAL))
-
-#mean_sight = mean(sight16)
-#mean_reg = mean(reg16)
-#summary(lm(y~x, data=dataTOTAL))$coef
 
 # cor(sight16, reg16)
 # cor(sight17, reg17)
