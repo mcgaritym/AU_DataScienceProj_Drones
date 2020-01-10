@@ -12,11 +12,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r library, include=FALSE}
 library(tidyverse)
+#library(dplyr)
+#library(ggplot2)
+#library(tidyr)
 library(readxl)
-library(dplyr)
 library(DescTools)
-library(ggplot2)
-library(tidyr)
 library(stringr)
 library(lubridate)
 library(datasets)
@@ -219,7 +219,6 @@ rm(list = ls(pattern = "^sdata"))
 sight_all$State <- toupper(sight_all$State)
 sight_all$State <- gsub('LOUISANA', 'LOUISIANA', sight_all$State)
 sight_all <- sight_all[sight_all$State != "PUERTO RICO",]
-#dataO <- dataO[dataO$State != "DISTRICT OF COLUMBIA",]
 sight_all <- sight_all[sight_all$State != "U.S. VIRGIN ISLANDS",]
 sight_all <- sight_all[sight_all$State != "CANADA",]
 sight_all <- sight_all[sight_all$State != "NORTHERN MARIANA ISLANDS",]
