@@ -16,11 +16,13 @@ library(readxl)
 library(dplyr)
 library(DescTools)
 library(ggplot2)
-#library(usmap)
 library(tidyr)
 library(stringr)
 library(lubridate)
 library(datasets)
+#library(MCMCpack)
+#library(usmap)
+
 ```
 
 
@@ -39,50 +41,54 @@ names(pop_data)[2] <- "Population"
 
 ```{r comb_regis_data, include=FALSE}
 
-regis_data1 <- read_excel("data/Registrations_Data/Registrations-City-State-Country-Count-2015Q4-2018Q3.xlsx")
-names(regis_data1)[1] = "Year"
-names(regis_data1)[4] = "State"
-names(regis_data1)[7] = "RegistrationCount"
-regis_data1 <- regis_data1[regis_data1$Country == 'United States',]
-regis_data1 <- regis_data1[-c(2,5,6)]
-regis_data1 <- subset(regis_data1, regis_data1$State != "")
-regis_data1$State <- state.name[match(regis_data1$State,state.abb)]
-regis_data1$State[is.na(regis_data1$State)] <- "District of Columbia"
+rdata1 <- read_excel("data/Registrations_Data/Registrations-City-State-Country-Count-2015Q4-2018Q3.xlsx")
+names(rdata1)[1] = "Year"
+names(rdata1)[4] = "State"
+names(rdata1)[7] = "RegistrationCount"
+rdata1 <- rdata1[rdata1$Country == 'United States',]
+rdata1 <- rdata1[-c(2,5,6)]
+rdata1 <- subset(rdata1, rdata1$State != "")
+rdata1$State <- state.name[match(rdata1$State,state.abb)]
+rdata1$State[is.na(rdata1$State)] <- "District of Columbia"
 
-regis_data2 <- read_excel("data/Registrations_Data/Registrations-City-State-Country-Count-2019Q1.xlsx")
-names(regis_data2)[2] = "State"
-names(regis_data2)[5] = "RegistrationCount"
-regis_data2 <- regis_data2[regis_data2$Country == 'United States',]
-regis_data2 <- regis_data2[-c(3,4)]
-regis_data2 <- subset(regis_data2, regis_data2$State != "")
-regis_data2$State <- state.name[match(regis_data2$State,state.abb)]
-regis_data2$Year <- '2019'
-regis_data2$State[is.na(regis_data2$State)] <- "District of Columbia"
+rdata2 <- read_excel("data/Registrations_Data/Registrations-City-State-Country-Count-2019Q1.xlsx")
+names(rdata2)[2] = "State"
+names(rdata2)[5] = "RegistrationCount"
+rdata2 <- rdata2[rdata2$Country == 'United States',]
+rdata2 <- rdata2[-c(3,4)]
+rdata2 <- subset(rdata2, rdata2$State != "")
+rdata2$State <- state.name[match(rdata2$State,state.abb)]
+rdata2$Year <- '2019'
+rdata2$State[is.na(rdata2$State)] <- "District of Columbia"
 
-regis_data3 <- read_excel("data/Registrations_Data/Registrations-City-State-Country-Count-2019Q2.xlsx")
-names(regis_data3)[2] = "State"
-names(regis_data3)[5] = "RegistrationCount"
-regis_data3 <- regis_data3[regis_data3$Country == 'United States',]
-regis_data3 <- regis_data3[-c(3,4)]
-regis_data3 <- subset(regis_data3, regis_data3$State != "")
-regis_data3$State <- state.name[match(regis_data3$State,state.abb)]
-regis_data3$Year <- '2019'
-regis_data3$State[is.na(regis_data3$State)] <- "District of Columbia"
+rdata3 <- read_excel("data/Registrations_Data/Registrations-City-State-Country-Count-2019Q2.xlsx")
+names(rdata3)[2] = "State"
+names(rdata3)[5] = "RegistrationCount"
+rdata3 <- rdata3[rdata3$Country == 'United States',]
+rdata3 <- rdata3[-c(3,4)]
+rdata3 <- subset(rdata3, rdata3$State != "")
+rdata3$State <- state.name[match(rdata3$State,state.abb)]
+rdata3$Year <- '2019'
+rdata3$State[is.na(rdata3$State)] <- "District of Columbia"
 
-regis_data4 <- read_excel("data/Registrations_Data/Registrations-City-State-Country-Count-2019Q3.xlsx")
-names(regis_data4)[2] = "State"
-names(regis_data4)[5] = "RegistrationCount"
-regis_data4 <- regis_data4[regis_data4$Country == 'United States',]
-regis_data4 <- regis_data4[-c(3,4)]
-regis_data4 <- subset(regis_data4, regis_data4$State != "")
-regis_data4$State <- state.name[match(regis_data4$State,state.abb)]
-regis_data4$Year <- '2019'
-regis_data4$State[is.na(regis_data4$State)] <- "District of Columbia"
+rdata4 <- read_excel("data/Registrations_Data/Registrations-City-State-Country-Count-2019Q3.xlsx")
+names(rdata4)[2] = "State"
+names(rdata4)[5] = "RegistrationCount"
+rdata4 <- rdata4[rdata4$Country == 'United States',]
+rdata4 <- rdata4[-c(3,4)]
+rdata4 <- subset(rdata4, rdata4$State != "")
+rdata4$State <- state.name[match(rdata4$State,state.abb)]
+rdata4$Year <- '2019'
+rdata4$State[is.na(rdata4$State)] <- "District of Columbia"
 
-regis_data1$Year <- as.character(regis_data1$Year)
-dataRegA <- bind_rows(regis_data1, regis_data2)
-dataRegB <- bind_rows(dataRegA, regis_data3)
-dataRegTOTAL <- bind_rows(dataRegB, regis_data4)
+rdata1$Year <- as.character(rdata1$Year)
+dataRegA <- bind_rows(rdata1, rdata2)
+dataRegB <- bind_rows(dataRegA, rdata3)
+dataRegTOTAL <- bind_rows(dataRegB, rdata4)
+
+#remove temporary registration data that have been combined
+rm(list = ls(pattern = "^rdata"))
+rm(list = ls(pattern = "^dataReg"))
 
 dataRegTOTAL2016 <- dataRegTOTAL[dataRegTOTAL$Year == "2016",]
 dataRegTOTAL2017 <- dataRegTOTAL[dataRegTOTAL$Year == "2017",]
@@ -92,19 +98,19 @@ dataRegTOTAL2018 <- dataRegTOTAL[dataRegTOTAL$Year == "2018",]
 Regunique_states2016 <- unique(dataRegTOTAL2016$State)
 Regunique_states2016 <- sort(Regunique_states2016)
 RegCOUNT2016 <- data.frame(unclass(table(dataRegTOTAL2016$State, useNA = "ifany")))
-names(RegCOUNT2016)[1] <- "2016RegCount"
+names(RegCOUNT2016)[1] <- "RegCount2016"
 dataRegTOTAL2016 <- bind_cols(pop_data, RegCOUNT2016)
 
 Regunique_states2017 <- unique(dataRegTOTAL2017$State)
 Regunique_states2017 <- sort(Regunique_states2017)
 RegCOUNT2017 <- data.frame(unclass(table(dataRegTOTAL2017$State, useNA = "ifany")))
-names(RegCOUNT2017)[1] <- "2017RegCount"
+names(RegCOUNT2017)[1] <- "RegCount2017"
 dataRegTOTAL2017 <- bind_cols(pop_data, RegCOUNT2017)
 
 Regunique_states2018 <- unique(dataRegTOTAL2018$State)
 Regunique_states2018 <- sort(Regunique_states2018)
 RegCOUNT2018 <- data.frame(unclass(table(dataRegTOTAL2018$State, useNA = "ifany")))
-names(RegCOUNT2018)[1] <- "2018RegCount"
+names(RegCOUNT2018)[1] <- "RegCount2018"
 dataRegTOTAL2018 <- bind_cols(pop_data, RegCOUNT2018)
 
 # Regunique_states <- unique(dataRegTOTAL$State)
@@ -113,148 +119,139 @@ dataRegTOTAL2018 <- bind_cols(pop_data, RegCOUNT2018)
 # names(RegCOUNT)[1] <- "TOTALRegCount"
 # dataRegTOTAL <- bind_cols(pop_data, RegCOUNT)
 dataRegTOTAL <- bind_cols(pop_data, RegCOUNT2016, RegCOUNT2017, RegCOUNT2018)
+
 ```
+
 
 ```{r comb_sight_data, include=FALSE}
 
-#drone sightings load data
-data1 <- read_excel("data/UAS_Sightings_Data/FY2019_Q3_UAS_Sightings.xlsx")
-names(data1)[1] <- "Date"
+# reads UAS sightings data, some data cleaning unique to certain files
+sdata1 <- read_excel("data/UAS_Sightings_Data/FY2019_Q3_UAS_Sightings.xlsx")
+names(sdata1)[1] <- "Date"
+sdata2 <- read_excel("data/UAS_Sightings_Data/FY2019_Q2_UAS_Sightings.xlsx")
+names(sdata2)[1] <- "Date"
+sdata3 <- read_excel("data/UAS_Sightings_Data/FY2019_Q1_UAS_Sightings.xlsx")
+names(sdata3)[1] <- "Date"
+sdata4 <- read_excel("data/UAS_Sightings_Data/FY2018_Q4_UAS_Sightings.xlsx")
+names(sdata4)[1] <- "Date"
+sdata5 <- read_excel("data/UAS_Sightings_Data/FY2018_Q3_UAS_Sightings.xlsx")
+names(sdata5)[1] <- "Date"
+sdata6 <- read_excel("data/UAS_Sightings_Data/FY2018_Q2_UAS_Sightings.xlsx")
+names(sdata6)[1] <- "Date"
+sdata7 <- read_excel("data/UAS_Sightings_Data/FY2018_Q1_UAS_Sightings.xlsx")
+names(sdata7)[1] <- "Date"
+sdata8 <- read_excel("data/UAS_Sightings_Data/FY2017_Q4_De-identification_Redaction_11192017.xlsx")
+names(sdata8)[1] <- "Date"
+names(sdata8)[2] <- "Summary"
+sdata9 <- read_excel("data/UAS_Sightings_Data/UAS_sightings_report_Apr_Jun2017.xlsx")
+names(sdata9)[1] <- "Date"
+sdata9$Date <- as.Date(sdata9$Date, "%B %d, %Y")
+sdata10 <- read_excel("data/UAS_Sightings_Data/UAS_sightings_report_Jan_Mar2017.xlsx")
+names(sdata10)[1] <- "Date"
+sdata10$Date <- as.Date(sdata10$Date, "%m/%d/%Y")
+sdata11 <- read_excel("data/UAS_Sightings_Data/UAS_sightings_report_170331.xlsx")
+names(sdata11)[1] <- "Date"
+names(sdata11)[2] <- "City"
+names(sdata11)[3] <- "State"
+names(sdata11)[4] <- "Summary"
+sdata11 <- sdata11[-c(5:8)]
+sdata12 <- read_excel("data/UAS_Sightings_Data/UAS_Sightings_report_1Jul-30Sep16.xlsx")
+names(sdata12)[1] <- "Date"
+names(sdata12)[2] <- "City"
+names(sdata12)[3] <- "State"
+names(sdata12)[4] <- "Summary"
+sdata13 <- read_excel("data/UAS_Sightings_Data/UAS_Sightings_report_1Apr-30Jun16.xlsx")
+names(sdata13)[1] <- "Date"
+names(sdata13)[2] <- "City"
+names(sdata13)[3] <- "State"
+names(sdata13)[4] <- "Summary"
+sdata13$Date <- as.numeric(sdata13$Date)
+sdata13$Date <- XLDateToPOSIXct(sdata13$Date)
+sdata14 <- read_excel("data/UAS_Sightings_Data/UAS_Sightings_report_1Feb-31Mar16.xlsx")
+names(sdata14)[1] <- "Date"
+names(sdata14)[2] <- "Summary"
+names(sdata14)[3] <- "City"
+names(sdata14)[4] <- "State"
+sdata15 <- read_excel("data/UAS_Sightings_Data/UAS_Sightings_report_21Aug-31Jan.xlsx")
+names(sdata15)[1] <- "Date"
+names(sdata15)[2] <- "Summary"
+names(sdata15)[3] <- "City"
+names(sdata15)[4] <- "State"
+sdata16 <- read_excel("data/UAS_Sightings_Data/UASEventsNov2014-Aug2015.xls")
+names(sdata16)[1] <- "Date"
+names(sdata16)[2] <- "City"
+names(sdata16)[3] <- "State"
+names(sdata16)[4] <- "Summary"
+sdata16 <- sdata16[-c(5:6)]
 
-data2 <- read_excel("data/UAS_Sightings_Data/FY2019_Q2_UAS_Sightings.xlsx")
-names(data2)[1] <- "Date"
+# binds read data into one 
+sdataA <- bind_rows(sdata1, sdata2)
+sdataB <- bind_rows(sdataA, sdata3)
+sdataC <- bind_rows(sdataB, sdata4)
+sdataD <- bind_rows(sdataC, sdata5)
+sdataE <- bind_rows(sdataD, sdata6)
+sdataF <- bind_rows(sdataE, sdata7)
+sdataG <- bind_rows(sdataF, sdata8)
+sdataG$Date <- as.Date(sdataG$Date, "%Y-%m-%d")
+sdataH <- bind_rows(sdataG, sdata9)
+sdataI <- bind_rows(sdataH, sdata10)
+sdata11$Date <- as.Date(sdata11$Date, "%Y-%m-%d")
+sdataJ <- bind_rows(sdataI, sdata11)
+sdata12$Date <- as.Date(sdata12$Date, "%Y-%m-%d")
+sdataK <- bind_rows(sdataJ, sdata12)
+sdata13$Date <- as.Date(sdata13$Date, "%Y-%m-%d")
+sdataL <- bind_rows(sdataK, sdata13)
+sdata14$Date <- as.Date(sdata14$Date, "%Y-%m-%d")
+sdataM <- bind_rows(sdataL, sdata14)
+sdata15$Date <- as.Date(sdata15$Date, "%Y-%m-%d")
+sdataN <- bind_rows(sdataM, sdata15)
+sdata16$Date <- as.Date(sdata16$Date, "%Y-%m-%d")
+sight_all <- bind_rows(sdataN, sdata16)
 
-data3 <- read_excel("data/UAS_Sightings_Data/FY2019_Q1_UAS_Sightings.xlsx")
-names(data3)[1] <- "Date"
+# removes temporary sighting data 
+rm(list = ls(pattern = "^sdata"))
 
-data4 <- read_excel("data/UAS_Sightings_Data/FY2018_Q4_UAS_Sightings.xlsx")
-names(data4)[1] <- "Date"
-
-data5 <- read_excel("data/UAS_Sightings_Data/FY2018_Q3_UAS_Sightings.xlsx")
-names(data5)[1] <- "Date"
-
-data6 <- read_excel("data/UAS_Sightings_Data/FY2018_Q2_UAS_Sightings.xlsx")
-names(data6)[1] <- "Date"
-
-data7 <- read_excel("data/UAS_Sightings_Data/FY2018_Q1_UAS_Sightings.xlsx")
-names(data7)[1] <- "Date"
-
-data8 <- read_excel("data/UAS_Sightings_Data/FY2017_Q4_De-identification_Redaction_11192017.xlsx")
-names(data8)[1] <- "Date"
-names(data8)[2] <- "Summary"
-
-data9 <- read_excel("data/UAS_Sightings_Data/UAS_sightings_report_Apr_Jun2017.xlsx")
-names(data9)[1] <- "Date"
-data9$Date <- as.Date(data9$Date, "%B %d, %Y")
-
-data10 <- read_excel("data/UAS_Sightings_Data/UAS_sightings_report_Jan_Mar2017.xlsx")
-names(data10)[1] <- "Date"
-data10$Date <- as.Date(data10$Date, "%m/%d/%Y")
-
-data11 <- read_excel("data/UAS_Sightings_Data/UAS_sightings_report_170331.xlsx")
-names(data11)[1] <- "Date"
-names(data11)[2] <- "City"
-names(data11)[3] <- "State"
-names(data11)[4] <- "Summary"
-data11 <- data11[-c(5:8)]
-
-data12 <- read_excel("data/UAS_Sightings_Data/UAS_Sightings_report_1Jul-30Sep16.xlsx")
-names(data12)[1] <- "Date"
-names(data12)[2] <- "City"
-names(data12)[3] <- "State"
-names(data12)[4] <- "Summary"
-
-data13 <- read_excel("data/UAS_Sightings_Data/UAS_Sightings_report_1Apr-30Jun16.xlsx")
-names(data13)[1] <- "Date"
-names(data13)[2] <- "City"
-names(data13)[3] <- "State"
-names(data13)[4] <- "Summary"
-data13$Date <- as.numeric(data13$Date)
-data13$Date <- XLDateToPOSIXct(data13$Date)
-
-data14 <- read_excel("data/UAS_Sightings_Data/UAS_Sightings_report_1Feb-31Mar16.xlsx")
-names(data14)[1] <- "Date"
-names(data14)[2] <- "Summary"
-names(data14)[3] <- "City"
-names(data14)[4] <- "State"
-
-data15 <- read_excel("data/UAS_Sightings_Data/UAS_Sightings_report_21Aug-31Jan.xlsx")
-names(data15)[1] <- "Date"
-names(data15)[2] <- "Summary"
-names(data15)[3] <- "City"
-names(data15)[4] <- "State"
-
-data16 <- read_excel("data/UAS_Sightings_Data/UASEventsNov2014-Aug2015.xls")
-names(data16)[1] <- "Date"
-names(data16)[2] <- "City"
-names(data16)[3] <- "State"
-names(data16)[4] <- "Summary"
-data16 <- data16[-c(5:6)]
-
-
-dataA <- bind_rows(data1, data2)
-dataB <- bind_rows(dataA, data3)
-dataC <- bind_rows(dataB, data4)
-dataD <- bind_rows(dataC, data5)
-dataE <- bind_rows(dataD, data6)
-dataF <- bind_rows(dataE, data7)
-dataG <- bind_rows(dataF, data8)
-dataG$Date <- as.Date(dataG$Date, "%Y-%m-%d")
-dataH <- bind_rows(dataG, data9)
-dataI <- bind_rows(dataH, data10)
-data11$Date <- as.Date(data11$Date, "%Y-%m-%d")
-dataJ <- bind_rows(dataI, data11)
-data12$Date <- as.Date(data12$Date, "%Y-%m-%d")
-dataK <- bind_rows(dataJ, data12)
-data13$Date <- as.Date(data13$Date, "%Y-%m-%d")
-dataL <- bind_rows(dataK, data13)
-data14$Date <- as.Date(data14$Date, "%Y-%m-%d")
-dataM <- bind_rows(dataL, data14)
-data15$Date <- as.Date(data15$Date, "%Y-%m-%d")
-dataN <- bind_rows(dataM, data15)
-data16$Date <- as.Date(data16$Date, "%Y-%m-%d")
-dataO <- bind_rows(dataN, data16)
 ```
 
 ```{r comb_data, include=FALSE}
 
-dataO$State <- toupper(dataO$State)
-dataO$State <- gsub('LOUISANA', 'LOUISIANA', dataO$State)
-dataO <- dataO[dataO$State != "PUERTO RICO",]
+sight_all$State <- toupper(sight_all$State)
+sight_all$State <- gsub('LOUISANA', 'LOUISIANA', sight_all$State)
+sight_all <- sight_all[sight_all$State != "PUERTO RICO",]
 #dataO <- dataO[dataO$State != "DISTRICT OF COLUMBIA",]
-dataO <- dataO[dataO$State != "U.S. VIRGIN ISLANDS",]
-dataO <- dataO[dataO$State != "CANADA",]
-dataO <- dataO[dataO$State != "NORTHERN MARIANA ISLANDS",]
-dataO <- subset(dataO, dataO$State != "")
+sight_all <- sight_all[sight_all$State != "U.S. VIRGIN ISLANDS",]
+sight_all <- sight_all[sight_all$State != "CANADA",]
+sight_all <- sight_all[sight_all$State != "NORTHERN MARIANA ISLANDS",]
+sight_all <- subset(sight_all, sight_all$State != "")
 
-data2016 <- subset(dataO, dataO$Date >= "2016-01-01" & dataO$Date <= "2016-12-31")
-data2017 <- subset(dataO, dataO$Date >= "2017-01-01" & dataO$Date <= "2017-12-31")
-data2018 <- subset(dataO, dataO$Date >= "2018-01-01" & dataO$Date <= "2018-12-31")
+data2016 <- subset(sight_all, sight_all$Date >= "2016-01-01" & sight_all$Date <= "2016-12-31")
+data2017 <- subset(sight_all, sight_all$Date >= "2017-01-01" & sight_all$Date <= "2017-12-31")
+data2018 <- subset(sight_all, sight_all$Date >= "2018-01-01" & sight_all$Date <= "2018-12-31")
 
-unique_states <- unique(dataO$State)
+unique_states <- unique(sight_all$State)
 unique_states <- sort(unique_states)
-StatesCOUNT <- data.frame(unclass(table(dataO$State, useNA = "ifany")))
+StatesCOUNT <- data.frame(unclass(table(sight_all$State, useNA = "ifany")))
 names(StatesCOUNT)[1] <- "TotalsightCount"
-dataTOTALall <- bind_cols(pop_data, Count=StatesCOUNT$sightCount)
+total_pop <- bind_cols(pop_data, Count=StatesCOUNT$sightCount)
 
 # dataTOTAL$Total_Relative_Count<-dataTOTAL$Count/dataTOTAL$Population
 
 unique_states2016s <- unique(data2016$State)
 unique_states2016s <- sort(unique_states2016s)
 StatesCOUNT2016s <- data.frame(unclass(table(data2016$State, useNA = "ifany")))
-names(StatesCOUNT2016s)[1] <- "2016sightCount"
+names(StatesCOUNT2016s)[1] <- "SightCount2016"
 dataTOTAL2016s <- bind_cols(pop_data, StatesCOUNT2016s)
 
 unique_states2017s <- unique(data2017$State)
 unique_states2017s <- sort(unique_states2017s)
 StatesCOUNT2017s <- data.frame(unclass(table(data2017$State, useNA = "ifany")))
-names(StatesCOUNT2017s)[1] <- "2017sightCount"
+names(StatesCOUNT2017s)[1] <- "SightCount2017"
 dataTOTAL2017s <- bind_cols(pop_data, StatesCOUNT2017s)
 
 unique_states2018s <- unique(data2018$State)
 unique_states2018s <- sort(unique_states2018s)
 StatesCOUNT2018s <- data.frame(unclass(table(data2018$State, useNA = "ifany")))
-names(StatesCOUNT2018s)[1] <- "2018sightCount"
+names(StatesCOUNT2018s)[1] <- "SightCount2018"
 dataTOTAL2018s <- bind_cols(pop_data, StatesCOUNT2018s)
 
 dataTOTAL2016to2018 <- bind_cols(pop_data, StatesCOUNT2016s, StatesCOUNT2017s, StatesCOUNT2018s)
@@ -263,10 +260,21 @@ income_data <- read_excel("data/Income_Data/median_household_income_by_state_3yr
 dataTOTAL <- bind_cols(dataTOTAL2016to2018, income_data[6:56,2], dataRegTOTAL[,3:5])
 names(dataTOTAL)[6] <- "Med_Income"
 dataTOTAL
+
+dataTOTAL$TotalSightings <- dataTOTAL$SightCount2016 + dataTOTAL$SightCount2017 + dataTOTAL$SightCount2018
+
+dataTOTAL$TotalRegs <- dataTOTAL$RegCount2016 + dataTOTAL$RegCount2017 + dataTOTAL$RegCount2018
+
+
+rm(list = ls(pattern = "^data20"))
+rm(list = ls(pattern = "^dataTOTAL20"))
+rm(list = ls(pattern = "^dataRegTOTAL"))
+rm(list = ls(pattern = "^RegCOUNT20"))
+rm(list = ls(pattern = "^StatesCOUNT"))
+
 #income_data[6:56,2], dataRegTOTAL[,3:5], dataTOTAL2016s[,3], dataTOTAL2017s[,3], dataTOTAL2018s[,3])
 #names(dataTOTAL)[1] <- "State"
 #names(dataTOTAL)[3] <- "SightingCount"
-
 
 #names(StatesCOUNT)[2] <- "Count"
 #StatesCOUNT <- as.data.frame(table(StatesCOUNT))
@@ -275,7 +283,7 @@ dataTOTAL
 #dataO$rel_pop_data <- dataO$*(1/pop_data$Population)
 #pop_data <- sort(table(pop_data$State))
 
-date_sort <- sort(table(dataO$Date))
+date_sort <- sort(table(sight_all$Date))
 #plot(state_sort, ylab="Number of Sightings", cex.lab = 0.8, cex.axis = 0.5, las = 2) 
 
 #heatmap
@@ -289,8 +297,40 @@ date_sort <- sort(table(dataO$Date))
 
 You can also embed plots, for example:
 
-```{r plotmap, echo=FALSE}
-#plot_usmap(data = dataTOTAL, values = "Count", color = "red") + scale_fill_continuous(low = "white", high = "red", name = "Drone Sightings Count", label = scales::comma) + theme(legend.position = "right")
+```{r analysis}
+sight16 <- dataTOTAL$SightCount2016
+reg16 <- dataTOTAL$RegCount2016
+sight17 <- dataTOTAL$SightCount2017
+reg17 <- dataTOTAL$RegCount2017
+sight18 <- dataTOTAL$SightCount2018
+reg18 <- dataTOTAL$RegCount2018
+
+ggplot(data = dataTOTAL) +
+  geom_point(mapping = aes(x=(reg18/Population)*1000, y=(sight18/Population)*1000, color = "red"))
+
+ggplot(data = dataTOTAL) +
+  geom_point(mapping = aes(x=reg18, y=sight18, color = "red"))
+
+#mean_sight = mean(sight16)
+#mean_reg = mean(reg16)
+#summary(lm(y~x, data=dataTOTAL))$coef
+
+# cor(sight16, reg16)
+# cor(sight17, reg17)
+# cor(sight18, reg18)
+# 
+# summary(lm(sight16 ~ reg16, data=dataTOTAL))
+# summary(lm(sight17 ~ reg16, data=dataTOTAL))
+
+# ggplot(data = dataTOTAL) +
+#   geom_point(mapping = aes(x=reg16, y=sight16, color = "red")) +
+#   geom_point(mapping = aes(x=reg17, y=sight17, color = "blue")) +
+#   geom_point(mapping = aes(x=reg18, y=sight18, color = "green")) #+
+#   geom_smooth(mapping = aes(x = reg16, y= sight16)) +
+#   geom_smooth(mapping = aes(x = reg17, y= sight17)) +
+#   geom_smooth(mapping = aes(x = reg18, y= sight18))
+
+
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
