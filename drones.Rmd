@@ -216,6 +216,7 @@ rm(list = ls(pattern = "^sdata"))
 
 ```{r comb_data, include=FALSE}
 
+
 sight_all$State <- toupper(sight_all$State)
 sight_all$State <- gsub('LOUISANA', 'LOUISIANA', sight_all$State)
 sight_all <- sight_all[sight_all$State != "PUERTO RICO",]
@@ -267,6 +268,16 @@ dataTOTAL$TotalSightings <- dataTOTAL$SightCount2016 + dataTOTAL$SightCount2017 
 
 dataTOTAL$TotalRegs <- dataTOTAL$RegCount2016 + dataTOTAL$RegCount2017 + dataTOTAL$RegCount2018
 
+sight_all$State <- StrCap(sight_all$State, method="title")
+sight_all$City <- StrCap(sight_all$City, method="title")
+sight_all <- merge(sight_all, pop_data, all=TRUE)
+income_data2 <- income_data[6:56,1:2] 
+names(income_data2)[1] <- "State"
+names(income_data2)[2] <- "Med_Income"
+sight_all <- merge(sight_all, income_data2, all=TRUE)
+sight_all <- merge(sight_all, dataTOTAL[c("State", "RegCount2016")], all=TRUE) 
+sight_all <- merge(sight_all, dataTOTAL[c("State", "RegCount2017")], all=TRUE) 
+sight_all <- merge(sight_all, dataTOTAL[c("State", "RegCount2018")], all=TRUE) 
 
 rm(list = ls(pattern = "^data20"))
 rm(list = ls(pattern = "^dataTOTAL20"))
