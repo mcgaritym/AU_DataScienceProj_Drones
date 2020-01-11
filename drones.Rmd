@@ -350,13 +350,27 @@ sight16 <- dataTOTAL$SightCount2016
 reg16 <- dataTOTAL$RegCount2016
 sight17 <- dataTOTAL$SightCount2017
 reg17 <- dataTOTAL$RegCount2017
+
 sight18 <- dataTOTAL$SightCount2018
 reg18 <- dataTOTAL$RegCount2018
 
 sTotal <- dataTOTAL$TotalSightings
 rTotal <- dataTOTAL$TotalRegs
+
 zindex18 <- dataTOTAL$`zindex-2018`
 milrank <- dataTOTAL$Score
+
+
+
+kdata <- dataTOTAL %>% select(SightCount2018, RegCount2018) %>%
+  transmute('sight18/pop' = (sight18/dataTOTAL$Population*1000)) %>%
+  mutate('reg18/pop' = (reg18/dataTOTAL$Population*1000))
+
+cls <- kmeans(kdata, 2)
+kdata$cluster <- as.character(cls$cluster)
+
+ggplot(data = kdata) + geom_point(mapping = aes(x = (reg18/dataTOTAL$Population*1000), y = (sight18/dataTOTAL$Population*1000), color=cluster))
+
 
 # ignore below: just testing stats
 
@@ -369,9 +383,9 @@ milrank <- dataTOTAL$Score
 # ggplot(data = dataTOTAL) +
 #   geom_point(mapping = aes(x=(reg18/Population)*1000, y=(sight18/Population)*1000, color = "red"))
 # 
-# summary(lm(sTotal ~ rTotal, data=dataTOTAL))
-# 
-# summary(lm(sTotal ~ rTotal + Med_Income + Population + zindex18, data=dataTOTAL))
+summary(lm(sTotal ~ rTotal, data=dataTOTAL))
+
+summary(lm(sTotal ~ rTotal + Med_Income + Population + zindex18, data=dataTOTAL))
 
 
 # cor(sight16, reg16)
