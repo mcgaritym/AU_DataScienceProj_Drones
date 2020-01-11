@@ -1,9 +1,10 @@
 ---
 title: "AU Data Science Project: Drones"
+date: 
 output:
   pdf_document: default
   html_document: default
-names: TBD 
+bibliography: bibliography.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -25,7 +26,7 @@ library(datasets)
 
 ```
 
-
+# test
 ## R Markdown
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
@@ -353,6 +354,8 @@ reg17 <- dataTOTAL$RegCount2017
 
 sight18 <- dataTOTAL$SightCount2018
 reg18 <- dataTOTAL$RegCount2018
+sight18bypop <- sight18/dataTOTAL$Population*1000
+reg18bypop <- reg18/dataTOTAL$Population*1000
 
 sTotal <- dataTOTAL$TotalSightings
 rTotal <- dataTOTAL$TotalRegs
@@ -360,35 +363,105 @@ rTotal <- dataTOTAL$TotalRegs
 zindex18 <- dataTOTAL$`zindex-2018`
 milrank <- dataTOTAL$Score
 
-```
+# get the heads and tails by desc sight and reg count 2018
+headSight <- dataTOTAL %>% select(State, SightCount2018)
+headReg <- dataTOTAL %>% select(State, RegCount2018)
+head(arrange(headSight,desc(SightCount2018)), n = 5)
+tail(arrange(headSight,desc(SightCount2018)), n = 5)
 
-## playing around with clusters - paused
-```{r cluster}
+head(arrange(headReg,desc(RegCount2018)), n = 5)
+tail(arrange(headReg,desc(RegCount2018)), n = 5)
 
+#correlation of sight and reg by year
+cor(sight16, reg16)
+cor(sight17, reg17)
+cor(sight18, reg18)
+
+#plot registration and sightings for '16, 17, 18
+ggplot(data = dataTOTAL) +
+  geom_point(mapping = aes(x=reg16, y=sight16, color = "green")) +
+  geom_point(mapping = aes(x=reg17, y=sight17, color = "red")) +
+  geom_point(mapping = aes(x=reg18, y=sight18, color = "blue")) +
+  xlab('registrations') +
+  ylab('sightings') +
+  scale_color_manual(name = 'year', 
+         values =c('green'='green', 'red'='blue', 'blue'='red'), 
+         labels = c('2016', '2017', '2018'))
+
+# add state labels to the 2018 registrations and sighting data
+ggplot(data = dataTOTAL) +
+  geom_point(mapping = aes(x=reg18, y=sight18))+
+  geom_text(aes(x=reg18, y=sight18, label=State))
+
+# linear regression on sightings in 18 by registrations in 18
+summary(lm(sight18 ~ reg18, data=dataTOTAL))
+
+# controlling for population
+ggplot(data = dataTOTAL) +
+  geom_point(mapping = aes(x=reg18bypop, y=sight18bypop)) +
+  geom_text(aes(x=reg18bypop, y=sight18bypop, label=State))
+
+#k-means clustering for data controlled for population
+#select the sight 18 and reg 18 as a matrix 
 kdata <- dataTOTAL %>% select(SightCount2018, RegCount2018) %>%
   transmute('sight18/pop' = (sight18/dataTOTAL$Population*1000)) %>%
   mutate('reg18/pop' = (reg18/dataTOTAL$Population*1000))
+# standardize the data
+kdata.standard <- data.frame(scale(kdata))
+ggplot(kdata.standard, aes(reg18bypop, sight18bypop)) + geom_point() + geom_smooth()
+# k-means clustering
+cls <- kmeans(kdata.standard, 2)
+kdata.standard$cluster <- as.character(cls$cluster)
+ggplot(data = kdata.standard) + geom_point(mapping = aes(x = (reg18/dataTOTAL$Population*1000), y = (sight18/dataTOTAL$Population*1000), color=cluster))
 
-cls <- kmeans(kdata, 2)
-kdata$cluster <- as.character(cls$cluster)
+#do same as above but remove DC
 
-ggplot(data = kdata) + geom_point(mapping = aes(x = (reg18/dataTOTAL$Population*1000), y = (sight18/dataTOTAL$Population*1000), color=cluster))
+# dataTOTAL_noDC <- dataTOTAL[dataTOTAL$State != "District of Columbia", ]
+# sight18_noDC <- dataTOTAL_noDC$SightCount2018
+# reg18_noDC <- dataTOTAL_noDC$RegCount2018
+# kdata <- dataTOTAL_noDC %>% select(SightCount2018, RegCount2018) %>%
+#   transmute('sight18/pop' = (sight18_noDC/dataTOTAL_noDC$Population*1000)) %>%
+#   mutate('reg18/pop' = (reg18_noDC/dataTOTAL_noDC$Population*1000))
+# kdata.standard <- data.frame(scale(kdata))
+# ggplot(kdata.standard, aes(reg18_noDC/dataTOTAL_noDC$Population*1000, sight18_noDC/dataTOTAL_noDC$Population*1000)) + geom_point() + geom_smooth()
+# cls <- kmeans(kdata.standard, 2)
+# kdata.standard$cluster <- as.character(cls$cluster)
+# ggplot(data = kdata.standard) + geom_point(mapping = aes(x = (reg18_noDC/dataTOTAL_noDC$Population*1000), y = (sight18_noDC/dataTOTAL_noDC$Population*1000), color=cluster))
 
-ggplot(data=kdata) + geom_point(mapping = aes(x = (reg18/dataTOTAL$Population*1000), y = (sight18/dataTOTAL$Population*1000), color = cluster))
+summary(lm(sight18 ~ reg18 + Med_Income + Population, data=dataTOTAL))
 
-kdata <- dataTOTAL %>% select(Population, TotalRegs) %>%
-  transmute('Population' = (dataTOTAL$Population*100000)) %>%
-  mutate('TotalRegs' = (reg18/dataTOTAL$Population*1000))
+summary(lm(sight18 ~ reg18 + Med_Income + Population +
+             zindex18 + Score, data=dataTOTAL))
 
-cls <- kmeans(kdata, 3)
-kdata$cluster <- as.character(cls$cluster)
+```
 
-ggplot(data=kdata) + geom_point(mapping = aes(x = (dataTOTAL$Population*1000), y = (reg18/dataTOTAL$Population*1000), color = cluster))
+## playing around with clusters - paused
+```{r cluster, include=FALSE}
+
+# kdata <- dataTOTAL %>% select(SightCount2018, RegCount2018) %>%
+#   transmute('sight18/pop' = (sight18/dataTOTAL$Population*1000)) %>%
+#   mutate('reg18/pop' = (reg18/dataTOTAL$Population*1000))
+# 
+# cls <- kmeans(kdata, 2)
+# kdata$cluster <- as.character(cls$cluster)
+# 
+# ggplot(data = kdata) + geom_point(mapping = aes(x = (reg18/dataTOTAL$Population*1000), y = (sight18/dataTOTAL$Population*1000), color=cluster))
+# 
+# ggplot(data=kdata) + geom_point(mapping = aes(x = (reg18/dataTOTAL$Population*1000), y = (sight18/dataTOTAL$Population*1000), color = cluster))
+# 
+# kdata <- dataTOTAL %>% select(Population, TotalRegs) %>%
+#   transmute('Population' = (dataTOTAL$Population*100000)) %>%
+#   mutate('TotalRegs' = (reg18/dataTOTAL$Population*1000))
+# 
+# cls <- kmeans(kdata, 3)
+# kdata$cluster <- as.character(cls$cluster)
+# 
+# ggplot(data=kdata) + geom_point(mapping = aes(x = (dataTOTAL$Population*1000), y = (reg18/dataTOTAL$Population*1000), color = cluster))
 
 ```
 
 
-```{r}
+```{r test, include=FALSE}
 
 # ignore below: just testing stats
 
@@ -424,3 +497,8 @@ ggplot(data=kdata) + geom_point(mapping = aes(x = (dataTOTAL$Population*1000), y
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+# References
+[@noauthor_foia_nodate]
+
+
