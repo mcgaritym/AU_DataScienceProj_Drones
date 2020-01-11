@@ -4,6 +4,7 @@ subtitle: "Winter Institute in Data Science"
 author: "Mark, Marc, Jocelyn, Sophie"
 date: "2020-1-11"
 output: pdf_document
+bibliography: bibliography.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -18,19 +19,33 @@ library(stringr)
 library(lubridate)
 library(datasets)
 library(usmap)
+library(fpc)
 
 ```
 
-## Background
+## Abstract
 
-
+Our goal was to analyze the correlation of Unmanned Aircraft Systems (UAS, or drone) sightings in each state to the amount of registrations of UAS + other variables from 2016 to 2018. We were interested in the drone data and the policies that may come with the correlation between registrations and sightings. we also looked into other factors (population, income, state rankings on entrepreneurship and/or technology and science). The assumption that UAS sightings and registrations correlate positively was held when only accounting for those two variables, but when controlling for population and incorprating additional factors into our model, we see that those other factors become more signficant.
 
 ## Data Sources
 
 We used a variety of sources, all websites, to accrue data sets of our characteristics that prompted us to test the correlation of Unmanned Aircraft Systems (UAS) sightings in each state to the amount of registrations in the same state from 2016 to 2018; UASs are commonly known as drones. 
-Our main data source was the Federal Aviation Administration (FAA) website that gave us the data sets of the total number of reported sightings, broken down to the very day and time of the report, and the total number of new registrations of UASs in each state, by the year. We combined the daily data of reported sightings and accounted for the yearly total in our data set in R, so we could have it at the same standard as registrations. We also combined “hobbyist” and “non-hobbyist” registrations for the purpose of our analysis. Hobbyist registrations are covered under Section 366 of the FAA website, and is for recreational flyers and modeler community-based organizations; the individual registered is considered a “modeler” and must be 13 years of age and a US citizen or legal permanent resident. Under Part 107 of Section 366, certified remote pilots, including commercial operators, must register.
-Our other two data sources were the Census Bureau and the US Bureau of Economic Analysis (BEA). The Census data sets measured the income and population of the United States, at the state level while the BEA accounted for population and income per county, by state. Once we started to look at different characteristics, we found that there was a significance between the number of sightings and the number of entrepreneurial activity in the United States per state; we used the Kauffman Indicators of Entrepreneurial website and their 2018 index level.
+Our main data source was the Federal Aviation Administration (FAA) website that gave us the data sets of the total number of reported sightings @sight, broken down to the very day and time of the report, and the total number of new registrations @reg of UASs in each state, by the year. We combined the daily data of reported sightings and accounted for the yearly total in our data set in R, so we could have it at the same standard as registrations. We also combined “hobbyist” and “non-hobbyist” registrations for the purpose of our analysis. Hobbyist registrations are covered under Section 366 of the FAA website, and is for recreational flyers and modeler community-based organizations; the individual registered is considered a “modeler” and must be 13 years of age and a US citizen or legal permanent resident. Under Part 107 of Section 366, certified remote pilots, including commercial operators, must register.
+Our other two data sources were the Census Bureau and the US Bureau of Economic Analysis (BEA). The Census data sets @census measured the income and population of the United States, at the state level while the BEA accounted for population and income per county, by state. @income Once we started to look at different characteristics, we found that there was a significance between the number of sightings and the number of entrepreneurial activity in the United States per state; we used the Kauffman Indicators of Entrepreneurial website and their 2018 index level. @kauffman Beyond the entrepreneurship index, we looked at the Milken Institute collection 2018 science and technology state rankings to see if there was a more in depth connection to our original variables, registrations and sightings. @milken
     Further, we tried to incorporate weather statistics, assuming that if a state was known to have more “clear” days per year, they would have more sightings but we could not find an accurate data source that accounted for data that aligned with our other characteristics. We found a data set on the Current Results website, but it was only data for major cities in each state, assuming the amount of sunshine a state usually has in a year. 
+    
+### Definitions 
+
+“Sightings” are reports made my citizens, pilots, and law enforcement to the FAA regarding any unmanned aircrafts sightings across the nation from 2016 to 2018. The FAA has reported that sightings have increased dramatically over the last two years, receiving more than 100 such reports each month. Although the FAA has continued work with their partners through the “Know Before You Fly” campaign to educate the public on how to operate within the rules and laws, unauthorized flying has remained an issue. Working closely with law enforcement, the FAA tries to identify and investigate UASs operations and rely heavily on the sightings report to do so. 
+
+“Registrations” are the FAA’s way of identifying and tracking the owners, operators, and flight patterns of UASs across the nation. Since the UAS will be flown in the National Airspace System, the FAA provides a list of safety tips for all operators, as well as the standards for different types of operators: defined as either hobbyist and non-hobbyist. Registrations cost $5 per aircraft and is valid for 3 years. For both hobbyist and non-hobbyist registrations, which we combined in the data, a register must provide an email address, credit or debit card, physical and mailing address, and the make and model of the unmanned aircraft.        
+
+### Sources of Bias
+
+In terms of questions asked, the first bias is probably from each of our background. Our group is interested in finding the correlations between drones registration and the number of drone sightings reported to FAA, however, not everyone is interested in this topic. So, our selection of questions to explore is an obvious bias. The next potential bias is the measure we used. The original data we found range from 1990s to 2018. Due to the fallacies of the initial data, we chose data that aligned with our parameters.
+As to the data gathering, we chose the parameters of the year (2016-2018). We tried various variables to experiment on what kind of results we can get and we decided to measure the sightings by state.  In addition, data gathered by each website doesn’t have a clear way of how they collected data. Other factors that may lead to biases including outliers, in our analysis, it is the California. Some missing values include some sightings but people may not report, and also drones that are registered.
+Finally, because we did not account for a random variable, therefore, we did not make corresponding interpretations. Another bias in data analysis is the regarding the reproducibility. We do not consider we have bias in reproducibility because there are no random variables that will change when the code is running each time. 
+We added the Kauffman Indicators of Entrepreneurship and Milken Institute Science and Technology Rankings for another input.  The variables that created the entrepreneurial index and income per state that isn’t accounted for in our data set.
 
 ## Data Cleaning
 
@@ -291,11 +306,15 @@ dataTOTAL <- merge(dataTOTAL, kese_tbl, by.x = "State", by.y = "region", all=TRU
 milken18 <- as_tibble(read_excel("data/Milken_Data/2018_ranking.xlsx"))
 milken18 <- milken18 %>% select(State, Score)
 dataTOTAL <- merge(dataTOTAL, milken18, by.x = "State", by.y = "State", all=TRUE)
+
+# Reads census regions data
+cregion <- as_tibble(read_csv("data/Income_Data/census_regions.csv"))
+cregion <- cregion %>% select(State, Region, Division)
+dataTOTAL <- merge(dataTOTAL, cregion, by.x = "State", by.y = "State", all=TRUE)
+
 ```
 
 ```{r vars, include=FALSE}
-logpop <- log(dataTOTAL$Population)
-
 sight16 <- dataTOTAL$SightCount2016
 reg16 <- dataTOTAL$RegCount2016
 sight17 <- dataTOTAL$SightCount2017
@@ -303,6 +322,7 @@ reg17 <- dataTOTAL$RegCount2017
 
 sight18 <- dataTOTAL$SightCount2018
 reg18 <- dataTOTAL$RegCount2018
+
 sight18bypop <- sight18/dataTOTAL$Population*1000
 reg18bypop <- reg18/dataTOTAL$Population*1000
 
@@ -310,16 +330,20 @@ sTotal <- dataTOTAL$TotalSightings
 rTotal <- dataTOTAL$TotalRegs
 
 zindex18 <- dataTOTAL$`zindex-2018`
-milrank <- dataTOTAL$Score
+milrank <- dataTOTAL$Score/100
 ```
 
 ## Exploratory Data Analysis
+
+First we measured correlation of number of UAS sightings and registrations by year.
 
 ```{r cor}
 cor(sight16, reg16)
 cor(sight17, reg17)
 cor(sight18, reg18)
 ```
+
+An interesting trend we noticed is that correlation between the two over the past 3 years have steadily increased. We then wanted to see this correlation on a plot:
 
 ```{r sightreg16to18, message=FALSE, fig.height=3, fig.width=5}
 # Plot UAS registrations and sightings for '16, 17, 18
@@ -336,20 +360,19 @@ ggplot(data = dataTOTAL) +
   labs(title = "UAS Sightings by Registrations (2016-2018)")
 ```
 
-```{r plotname, fig.height=3, fig.width=5}
+Exploring this data seems to visually suggest that there is indeed a strong correlation between number of sightings and registrations. We added the state names to the plot below.
+
+```{r plotname1, fig.height=2.5, fig.width=4}
 ggplot(data = dataTOTAL) +
   geom_point(mapping = aes(x=reg18, y=sight18))+
   geom_text(aes(x=reg18, y=sight18, label=State)) +
   labs(title = "UAS Sightings by Registrations (2018)",
        subtitle = "State Names")
-
-ggplot(data = dataTOTAL) +
-  geom_point(mapping = aes(x=reg18bypop, y=sight18bypop)) +
-  geom_text(aes(x=reg18bypop, y=sight18bypop, label=State)) +
-  labs(title = "UAS Sightings by Registrations (2018)",
-       subtitle = "State Names, Per 1000 People")
-
 ```
+
+However, we then thought about how there might be other factors that may be impacting number of sightings by registrations. One was population - if we see the top states by number of sightings or registrations, the same 4 states appear and happen to also be the same outliers in the above plot.
+
+The plot below shows the same plot as above but with sightings and registrations for every 1000 people.
 
 ```{r headstates}
 headSight <- dataTOTAL %>% select(State, Population, SightCount2018)
@@ -358,9 +381,18 @@ head(arrange(headSight,desc(SightCount2018)), n = 4)
 head(arrange(headReg,desc(RegCount2018)), n = 4)
 ```
 
+```{r plotname2, fig.height=2.5, fig.width=4}
+ggplot(data = dataTOTAL) +
+  geom_point(mapping = aes(x=reg18bypop, y=sight18bypop)) +
+  geom_text(aes(x=reg18bypop, y=sight18bypop, label=State)) +
+  labs(title = "UAS Sightings by Registrations (2018)",
+       subtitle = "State Names, Per 1000 People")
+```
+
+Below is a geographic visualization of the above data on the USA.
 
 ```{r usmap}
-# Maps total sightings 2016-18 by pop per 1000 on USA (continental)
+# Maps total sightings 2016-18 by pop per 1000 on USA
 # Removed DC as an outlier for visualization purpose 
 dataTOTAL_noDC <- dataTOTAL[dataTOTAL$State != "District of Columbia", ]
 names(dataTOTAL_noDC)[1] <- "state"
@@ -373,13 +405,54 @@ name = "Sightings Per 1000 People") +
 theme(legend.position = "right")
 ```
 
-```{r regression}
+We wanted to explore if there was anything interesting in the clusters of the data and US Census regions. First we standardized the data for a k-means clustering, and first visualized the data based on regions without the k-means clustering. We than visualized the clusters (we used 5 clusters to represent the 4 regions, with DC being its own cluster as an outlier).
 
-summary(glm(sight18 ~ reg18, family=poisson(), data=dataTOTAL))
+```{r kmeans, message=FALSE, fig.height=3, fig.width=5}
+kdata <- dataTOTAL %>% select(SightCount2018, RegCount2018) %>%
+  transmute(sight18bypop) %>%
+  mutate(reg18bypop)
 
-summary(glm(sight18 ~ reg18 + logpop + zindex18 + Score, family=poisson(), data=dataTOTAL))
+kdata.standard <- data.frame(scale(kdata))
+ggplot(kdata.standard, aes(reg18bypop, sight18bypop)) + geom_point() + geom_smooth()
+# k-means clustering
+cls <- kmeans(kdata.standard, 5)
+kdata.standard$cluster <- as.character(cls$cluster)
+ggplot(data = kdata.standard) + 
+  geom_point(mapping = aes(reg18bypop, sight18bypop)) +
+  geom_text(aes(x=reg18bypop, y=sight18bypop, label=dataTOTAL$Region, colour = dataTOTAL$Region)) 
+
+ggplot(data = kdata.standard) + 
+  geom_point(mapping = aes(reg18bypop, sight18bypop)) +
+  geom_text(aes(x=reg18bypop, y=sight18bypop, label=dataTOTAL$Region, colour = cluster)) 
 
 ```
 
+This is purely exploratory but we were interested in seeing if the regions would make up most, if not all, of a cluster generated by the k-means. The graph shows that the states within each region were not all similar to one another. We also found that no matter the number of clusters we generated, DC remained an outlier and its own cluster.
 
+## Linear Regression
+
+We ran one linear regression models to see if the outcome (sightings by population) are affected by registrations by population, and ran another where we included explanatory variables of median income, Kauffman Index, and Milken Ranks.
+
+```{r regression}
+
+summary(lm(sight18bypop ~ reg18bypop, data=dataTOTAL))
+
+```
+
+When we are only measuring the comparison between sightings by population and registrations by population, we again see the positive correlation and a significant p-value (< 0.05). However we also wanted to explore if other variables such as Median Income from BEA, the Kauffman Index on Entrepreneurship or Milken Index on State Science and Technology Rankings had impact on the sightings by population.
+
+```{r regression 2}
+
+summary(lm(sight18bypop ~ reg18bypop + Med_Income + zindex18 + milrank, data=dataTOTAL))
+
+```
+
+Now we see that the most significant variable is interestingly the Entrepreneurship Index. We assumed (when we decided to add the Milken rankings) that perhaps entrepreneurship may have been too vague to explain drone-related activities in a state, which is why we wanted to look at something more specific like Science and Technology rankings. However this regression shows that the Milken rankings are not significant at all in this model. Median Income was also significant, but not as much as the entrepreneurship index.
+
+## Next Steps
+
+Given more time, we recommend performing additional data cleaning and data analysis. For data cleaning, we recommend performing an Amelia method to help predict and fill in missing values for data, particularly location and time data for drone registrations. In addition, the drone sighting data did have some time stamp data, which could be extracted into a separate column to analyze drone sighting time data. Thus, we could have added drone sighting time data as a predicting variable in the regression model and other future analysis. In addition, we could reach out to the FAA or explore the registration data set more closely to determine if there is a way to determine drone registrations by day instead of quarter year (to compare to daily drone sightings). Since the drone registration data was given as a result of Freedom of Information Act (FOIA) request, another request could be made to understand the data in terms of days. 
+For the data analysis, we could perform other machine learning analysis in addition to regression modeling. The clustering method was explored, but could be tweaked to remove outliers and explore segments of States that meet a certain condition. For example, there could be a cluster of Western states with high drone registration data for a given reason. In addition, decision trees, random forest, neural networks and other machine learning methods could be explored against the regression model. However, many of these analysis are difficult with a small dataset (e.g. 51 states in addition to D.C.), and we could explore changing the structure of our data to provide more records for analysis. 
+
+# References
 
