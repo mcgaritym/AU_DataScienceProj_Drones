@@ -12,16 +12,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r library, include=FALSE}
 library(tidyverse)
-#library(dplyr)
-#library(ggplot2)
-#library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
 library(readxl)
 library(DescTools)
 library(stringr)
 library(lubridate)
 library(datasets)
 #library(MCMCpack)
-#library(usmap)
+library(usmap)
 
 ```
 
@@ -296,12 +296,6 @@ rm(list = ls(pattern = "^StatesCOUNT"))
 #pop_data <- sort(table(pop_data$State))
 
 date_sort <- sort(table(sight_all$Date))
-#plot(state_sort, ylab="Number of Sightings", cex.lab = 0.8, cex.axis = 0.5, las = 2) 
-
-#heatmap
-
-# names(dataTOTAL)[1] <- "state"
-# plot_usmap(data = dataTOTAL, values = "Count", color = "red") + scale_fill_continuous(low = "white", high = "red", name = "Drone Sightings Count", label = scales::comma) + theme(legend.position = "right")
 
 ```
 
@@ -360,6 +354,17 @@ rTotal <- dataTOTAL$TotalRegs
 zindex18 <- dataTOTAL$`zindex-2018`
 milrank <- dataTOTAL$Score
 
+
+names(dataTOTAL)[1] <- "state"
+dataTOTAL$RelSightings <- (dataTOTAL$TotalSightings/dataTOTAL$Population)*10000
+
+plot_usmap(data = dataTOTAL, values = "RelSightings") + 
+labs(title = "Drone Sightings (2016-2018)") +
+theme(panel.background = element_rect(colour = "black")) +
+scale_fill_continuous(low = "white", high ="darkblue",
+name = "Number of Sightings Per 10k People") +
+theme(legend.position = "right")
+names(dataTOTAL)[1] <- "State"
 ```
 
 ## playing around with clusters - paused
