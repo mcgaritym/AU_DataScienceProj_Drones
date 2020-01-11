@@ -360,7 +360,10 @@ rTotal <- dataTOTAL$TotalRegs
 zindex18 <- dataTOTAL$`zindex-2018`
 milrank <- dataTOTAL$Score
 
+```
 
+## playing around with clusters - paused
+```{r cluster}
 
 kdata <- dataTOTAL %>% select(SightCount2018, RegCount2018) %>%
   transmute('sight18/pop' = (sight18/dataTOTAL$Population*1000)) %>%
@@ -371,6 +374,21 @@ kdata$cluster <- as.character(cls$cluster)
 
 ggplot(data = kdata) + geom_point(mapping = aes(x = (reg18/dataTOTAL$Population*1000), y = (sight18/dataTOTAL$Population*1000), color=cluster))
 
+ggplot(data=kdata) + geom_point(mapping = aes(x = (reg18/dataTOTAL$Population*1000), y = (sight18/dataTOTAL$Population*1000), color = cluster))
+
+kdata <- dataTOTAL %>% select(Population, TotalRegs) %>%
+  transmute('Population' = (dataTOTAL$Population*100000)) %>%
+  mutate('TotalRegs' = (reg18/dataTOTAL$Population*1000))
+
+cls <- kmeans(kdata, 3)
+kdata$cluster <- as.character(cls$cluster)
+
+ggplot(data=kdata) + geom_point(mapping = aes(x = (dataTOTAL$Population*1000), y = (reg18/dataTOTAL$Population*1000), color = cluster))
+
+```
+
+
+```{r}
 
 # ignore below: just testing stats
 
@@ -383,9 +401,9 @@ ggplot(data = kdata) + geom_point(mapping = aes(x = (reg18/dataTOTAL$Population*
 # ggplot(data = dataTOTAL) +
 #   geom_point(mapping = aes(x=(reg18/Population)*1000, y=(sight18/Population)*1000, color = "red"))
 # 
-summary(lm(sTotal ~ rTotal, data=dataTOTAL))
+# summary(lm(sTotal ~ rTotal, data=dataTOTAL))
 
-summary(lm(sTotal ~ rTotal + Med_Income + Population + zindex18, data=dataTOTAL))
+# summary(lm(sTotal ~ rTotal + Med_Income + Population + zindex18, data=dataTOTAL))
 
 
 # cor(sight16, reg16)
@@ -402,7 +420,6 @@ summary(lm(sTotal ~ rTotal + Med_Income + Population + zindex18, data=dataTOTAL)
 #   geom_smooth(mapping = aes(x = reg16, y= sight16)) +
 #   geom_smooth(mapping = aes(x = reg17, y= sight17)) +
 #   geom_smooth(mapping = aes(x = reg18, y= sight18))
-
 
 ```
 
