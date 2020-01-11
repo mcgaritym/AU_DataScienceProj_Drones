@@ -1,11 +1,9 @@
 ---
-title: "AU Data Science Project: Drones"
-date: 
-output:
-  pdf_document: 
-  toc: true
-  toc_depth: 2
-bibliography: bibliography.bib
+title: "Final Project - UAS Sightings and Registrations"
+subtitle: "Winter Institute in Data Science"
+author: "Mark, Marc, Jocelyn, Sophie"
+date: "2020-1-11"
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -14,34 +12,48 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r library, include=FALSE}
 library(tidyverse)
-library(dplyr)
-library(ggplot2)
-library(tidyr)
 library(readxl)
 library(DescTools)
 library(stringr)
 library(lubridate)
 library(datasets)
-#library(MCMCpack)
 library(usmap)
 
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## Background
 
 
-```{r comb_pop_data, include=FALSE}
+
+## Data Sources
+
+We used a variety of sources, all websites, to accrue data sets of our characteristics that prompted us to test the correlation of Unmanned Aircraft Systems (UAS) sightings in each state to the amount of registrations in the same state from 2016 to 2018; UASs are commonly known as drones. 
+Our main data source was the Federal Aviation Administration (FAA) website that gave us the data sets of the total number of reported sightings, broken down to the very day and time of the report, and the total number of new registrations of UASs in each state, by the year. We combined the daily data of reported sightings and accounted for the yearly total in our data set in R, so we could have it at the same standard as registrations. We also combined “hobbyist” and “non-hobbyist” registrations for the purpose of our analysis. Hobbyist registrations are covered under Section 366 of the FAA website, and is for recreational flyers and modeler community-based organizations; the individual registered is considered a “modeler” and must be 13 years of age and a US citizen or legal permanent resident. Under Part 107 of Section 366, certified remote pilots, including commercial operators, must register.
+Our other two data sources were the Census Bureau and the US Bureau of Economic Analysis (BEA). The Census data sets measured the income and population of the United States, at the state level while the BEA accounted for population and income per county, by state. Once we started to look at different characteristics, we found that there was a significance between the number of sightings and the number of entrepreneurial activity in the United States per state; we used the Kauffman Indicators of Entrepreneurial website and their 2018 index level.
+    Further, we tried to incorporate weather statistics, assuming that if a state was known to have more “clear” days per year, they would have more sightings but we could not find an accurate data source that accounted for data that aligned with our other characteristics. We found a data set on the Current Results website, but it was only data for major cities in each state, assuming the amount of sunshine a state usually has in a year. 
+
+## Data Cleaning
+
+The data for our project came from four separate sources: One (1) US Census State Population (Yrs 2016-2018), One (1) US Census Median Income (Yrs 2016-2018), sixteen (16) Federal Aviation Administration Drone Sightings, Five (5) Federal Aviation Administration Drone Registrations
+
+Data from these URL links (saved online as Microsoft Excel .xlsx files) into an R Markdown file, as well as the necessary R packages (tidyverse, dplyr, stringr, DescTools, etc). The data was then cleaned in R, in order to merge into a consistent format:
+
+The population data and income data (from US Census site) was already in an easy format to read into R with separate rows for each State (as well as District of Columbia). Some minimal cleaning was required, and included indexing certain row/column names, and changing column names for consistency. Also, the syntax of column names was modified using various functions to be a consistent format for merging.  
+
+In regards to dates, they were in various formats (e.g. Jun 1, 2019 or 2019-06-01, or Jun 1, 2019 08:33 or missing) for both of the files. For the drone sightings database, the dates were specific to the day, while the drone registration database was specific to the quarter of the year. Thus, this drove the decision to examine the data primarily from a year-by-year level. 
+
+In regards to locations, the drone registration database was in a City and State format, while the drone registration data was in City, Zip Code and State format. In addition, there was missing City and Zip code data for a chunk of the drone registration data. Since it was difficult to locate population and income data specific to an individual City and Zip Code, the data was summarized primarily at a State level for location.
+ In addition, the locations were in various formats (VIRGINIA, Virginia, VA), which required processing to get in consistent format. Data which contained missing date or location values were removed from the dataset.
+After merging/binding the data, it provided columns for median income, population, drone registration in 2016, drone registration in 2017, drone registration in 2018, drone sightings in 2016, drone registration in 2017, and drone sightings in 2018.
+
+
+```{r clean, include=FALSE}
+# Population data 
 pop_data <- read_excel("data/Pop_Data/nst-est2019-01.xlsx")
 names(pop_data)[1] <- "State"
 names(pop_data)[2] <- "Population"
-```
 
-```{r comb_regis_data, include=FALSE}
-
+# FAA registration data
 rdata1 <- read_excel("data/Registrations_Data/Registrations-City-State-Country-Count-2015Q4-2018Q3.xlsx")
 names(rdata1)[1] = "Year"
 names(rdata1)[4] = "State"
@@ -82,6 +94,7 @@ rdata4$State <- state.name[match(rdata4$State,state.abb)]
 rdata4$Year <- '2019'
 rdata4$State[is.na(rdata4$State)] <- "District of Columbia"
 
+# Binds together the registration data
 rdata1$Year <- as.character(rdata1$Year)
 dataRegA <- bind_rows(rdata1, rdata2)
 dataRegB <- bind_rows(dataRegA, rdata3)
@@ -92,10 +105,10 @@ rm(list = ls(pattern = "^rdata"))
 rm(dataRegA)
 rm(dataRegB)
 
+# subset data by year
 dataRegTOTAL2016 <- dataRegTOTAL[dataRegTOTAL$Year == "2016",]
 dataRegTOTAL2017 <- dataRegTOTAL[dataRegTOTAL$Year == "2017",]
 dataRegTOTAL2018 <- dataRegTOTAL[dataRegTOTAL$Year == "2018",]
-#dataRegTOTAL <- subset(dataRegTOTAL, dataRegTOTAL$State != "")
 
 Regunique_states2016 <- unique(dataRegTOTAL2016$State)
 Regunique_states2016 <- sort(Regunique_states2016)
@@ -115,17 +128,7 @@ RegCOUNT2018 <- data.frame(unclass(table(dataRegTOTAL2018$State, useNA = "ifany"
 names(RegCOUNT2018)[1] <- "RegCount2018"
 dataRegTOTAL2018 <- bind_cols(pop_data, RegCOUNT2018)
 
-# Regunique_states <- unique(dataRegTOTAL$State)
-# Regunique_states <- sort(Regunique_states)
-# RegCOUNT <- data.frame(unclass(table(dataRegTOTAL$State, useNA = "ifany")))
-# names(RegCOUNT)[1] <- "TOTALRegCount"
-# dataRegTOTAL <- bind_cols(pop_data, RegCOUNT)
 dataRegTOTAL <- bind_cols(pop_data, RegCOUNT2016, RegCOUNT2017, RegCOUNT2018)
-
-```
-
-
-```{r comb_sight_data, include=FALSE}
 
 # reads UAS sightings data, some data cleaning unique to certain files
 sdata1 <- read_excel("data/UAS_Sightings_Data/FY2019_Q3_UAS_Sightings.xlsx")
@@ -213,11 +216,6 @@ sight_all <- bind_rows(sdataN, sdata16)
 # removes temporary sighting data 
 rm(list = ls(pattern = "^sdata"))
 
-```
-
-```{r comb_data, include=FALSE}
-
-
 sight_all$State <- toupper(sight_all$State)
 sight_all$State <- gsub('LOUISANA', 'LOUISIANA', sight_all$State)
 sight_all <- sight_all[sight_all$State != "PUERTO RICO",]
@@ -235,8 +233,6 @@ unique_states <- sort(unique_states)
 StatesCOUNT <- data.frame(unclass(table(sight_all$State, useNA = "ifany")))
 names(StatesCOUNT)[1] <- "TotalsightCount"
 total_pop <- bind_cols(pop_data, Count=StatesCOUNT$sightCount)
-
-# dataTOTAL$Total_Relative_Count<-dataTOTAL$Count/dataTOTAL$Population
 
 unique_states2016s <- unique(data2016$State)
 unique_states2016s <- sort(unique_states2016s)
@@ -262,7 +258,6 @@ income_data <- read_excel("data/Income_Data/median_household_income_by_state_3yr
 dataTOTAL <- bind_cols(dataTOTAL2016to2018, income_data[6:56,2], dataRegTOTAL[,3:5])
 names(dataTOTAL)[6] <- "Med_Income"
 dataTOTAL$Med_Income <- as.numeric(dataTOTAL$Med_Income)
-dataTOTAL
 
 dataTOTAL$TotalSightings <- dataTOTAL$SightCount2016 + dataTOTAL$SightCount2017 + dataTOTAL$SightCount2018
 
@@ -285,62 +280,22 @@ rm(list = ls(pattern = "^dataRegTOTAL"))
 rm(list = ls(pattern = "^RegCOUNT20"))
 rm(list = ls(pattern = "^StatesCOUNT"))
 
-#income_data[6:56,2], dataRegTOTAL[,3:5], dataTOTAL2016s[,3], dataTOTAL2017s[,3], dataTOTAL2018s[,3])
-#names(dataTOTAL)[1] <- "State"
-#names(dataTOTAL)[3] <- "SightingCount"
-
-#names(StatesCOUNT)[2] <- "Count"
-#StatesCOUNT <- as.data.frame(table(StatesCOUNT))
-
-#dataOa <- bind_rows(dataO, pop_data)
-#dataO$rel_pop_data <- dataO$*(1/pop_data$Population)
-#pop_data <- sort(table(pop_data$State))
-
-date_sort <- sort(table(sight_all$Date))
-
-```
-
-```{r kese}
+# Reads and selects index 2016-2018 in the Kauffman entrepreneurship data
 kese_tbl <- as_tibble(read_csv("data/Kauffman_Data/KESE - KESE Index - Data 1998-2018.csv"))
-
 kese_tbl <- kese_tbl %>%
   select(region, 'zindex-2016', 'zindex-2017', 'zindex-2018') 
-
 kese_tbl <- kese_tbl[kese_tbl$region != "United States", ]
-
 dataTOTAL <- merge(dataTOTAL, kese_tbl, by.x = "State", by.y = "region", all=TRUE) 
 
-```
-
-```{r weather}
-# # 
-# weather <- as_tibble(read_excel("data/Weather_Data/avg_annual_sun.xlsx"))
-# 
-# # Selects the state and number of 'clear days'
-# # no 'clear days' data for DC
-# weather <- weather %>%
-#   select(State, 'Clear Days')
-# 
-# dataTOTAL <- merge(dataTOTAL, weather, by.x = "State", by.y = "State", all=TRUE) 
-
-```
-
-```{r milken}
-
+# Reads Milken Institute Science and Techn rankings 
 milken18 <- as_tibble(read_excel("data/Milken_Data/2018_ranking.xlsx"))
-
 milken18 <- milken18 %>% select(State, Score)
-
 dataTOTAL <- merge(dataTOTAL, milken18, by.x = "State", by.y = "State", all=TRUE)
-
 ```
 
+```{r vars, include=FALSE}
+logpop <- log(dataTOTAL$Population)
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r analysis}
 sight16 <- dataTOTAL$SightCount2016
 reg16 <- dataTOTAL$RegCount2016
 sight17 <- dataTOTAL$SightCount2017
@@ -356,163 +311,75 @@ rTotal <- dataTOTAL$TotalRegs
 
 zindex18 <- dataTOTAL$`zindex-2018`
 milrank <- dataTOTAL$Score
+```
 
-# get the heads and tails by desc sight and reg count 2018
-headSight <- dataTOTAL %>% select(State, SightCount2018)
-headReg <- dataTOTAL %>% select(State, RegCount2018)
-head(arrange(headSight,desc(SightCount2018)), n = 5)
-tail(arrange(headSight,desc(SightCount2018)), n = 5)
+## Exploratory Data Analysis
 
-head(arrange(headReg,desc(RegCount2018)), n = 5)
-tail(arrange(headReg,desc(RegCount2018)), n = 5)
-
-#correlation of sight and reg by year
+```{r cor}
 cor(sight16, reg16)
 cor(sight17, reg17)
 cor(sight18, reg18)
+```
 
-#plot registration and sightings for '16, 17, 18
+```{r sightreg16to18, message=FALSE, fig.height=3, fig.width=5}
+# Plot UAS registrations and sightings for '16, 17, 18
 ggplot(data = dataTOTAL) +
-  geom_point(mapping = aes(x=reg16, y=sight16, color = "green")) +
-  geom_point(mapping = aes(x=reg17, y=sight17, color = "red")) +
+  geom_point(mapping = aes(x=reg16, y=sight16, color = "red")) +
+  geom_point(mapping = aes(x=reg17, y=sight17, color = "green")) +
   geom_point(mapping = aes(x=reg18, y=sight18, color = "blue")) +
+  geom_smooth(aes(x=reg18, y=sight18)) +
   xlab('registrations') +
   ylab('sightings') +
   scale_color_manual(name = 'year', 
          values =c('green'='green', 'red'='blue', 'blue'='red'), 
-         labels = c('2016', '2017', '2018'))
+         labels = c('2016', '2017', '2018')) +
+  labs(title = "UAS Sightings by Registrations (2016-2018)")
+```
 
-# add state labels to the 2018 registrations and sighting data
+```{r plotname, fig.height=3, fig.width=5}
 ggplot(data = dataTOTAL) +
   geom_point(mapping = aes(x=reg18, y=sight18))+
-  geom_text(aes(x=reg18, y=sight18, label=State))
+  geom_text(aes(x=reg18, y=sight18, label=State)) +
+  labs(title = "UAS Sightings by Registrations (2018)",
+       subtitle = "State Names")
 
-# linear regression on sightings in 18 by registrations in 18
-summary(lm(sight18 ~ reg18, data=dataTOTAL))
-
-# controlling for population
 ggplot(data = dataTOTAL) +
   geom_point(mapping = aes(x=reg18bypop, y=sight18bypop)) +
-  geom_text(aes(x=reg18bypop, y=sight18bypop, label=State))
+  geom_text(aes(x=reg18bypop, y=sight18bypop, label=State)) +
+  labs(title = "UAS Sightings by Registrations (2018)",
+       subtitle = "State Names, Per 1000 People")
 
-#k-means clustering for data controlled for population
-#select the sight 18 and reg 18 as a matrix 
+```
+
+```{r headstates}
+headSight <- dataTOTAL %>% select(State, Population, SightCount2018)
+headReg <- dataTOTAL %>% select(State, Population, RegCount2018)
+head(arrange(headSight,desc(SightCount2018)), n = 4)
+head(arrange(headReg,desc(RegCount2018)), n = 4)
+```
 
 
-names(dataTOTAL)[1] <- "state"
-dataTOTAL$RelSightings <- (dataTOTAL$TotalSightings/dataTOTAL$Population)*1000
-
-plot_usmap(data = dataTOTAL, values = "RelSightings") + 
+```{r usmap}
+# Maps total sightings 2016-18 by pop per 1000 on USA (continental)
+# Removed DC as an outlier for visualization purpose 
+dataTOTAL_noDC <- dataTOTAL[dataTOTAL$State != "District of Columbia", ]
+names(dataTOTAL_noDC)[1] <- "state"
+dataTOTAL_noDC$RelSightings <- (dataTOTAL_noDC$TotalSightings/dataTOTAL_noDC$Population)*1000
+plot_usmap(data = dataTOTAL_noDC, values = "RelSightings") + 
 labs(title = "Drone Sightings (2016-2018)") +
 theme(panel.background = element_rect(colour = "black")) +
 scale_fill_continuous(low = "white", high ="darkblue",
-name = "Number of Sightings Per 1000 People") +
+name = "Sightings Per 1000 People") +
 theme(legend.position = "right")
-names(dataTOTAL)[1] <- "State"
 ```
 
-## playing around with clusters - paused
-```{r cluster}
+```{r regression}
 
-kdata <- dataTOTAL %>% select(SightCount2018, RegCount2018) %>%
-  transmute('sight18/pop' = (sight18/dataTOTAL$Population*1000)) %>%
-  mutate('reg18/pop' = (reg18/dataTOTAL$Population*1000))
-# standardize the data
-kdata.standard <- data.frame(scale(kdata))
-ggplot(kdata.standard, aes(reg18bypop, sight18bypop)) + geom_point() + geom_smooth()
-# k-means clustering
-cls <- kmeans(kdata.standard, 2)
-kdata.standard$cluster <- as.character(cls$cluster)
-ggplot(data = kdata.standard) + geom_point(mapping = aes(x = (reg18/dataTOTAL$Population*1000), y = (sight18/dataTOTAL$Population*1000), color=cluster))
+summary(glm(sight18 ~ reg18, family=poisson(), data=dataTOTAL))
 
-#do same as above but remove DC
-
-# dataTOTAL_noDC <- dataTOTAL[dataTOTAL$State != "District of Columbia", ]
-# sight18_noDC <- dataTOTAL_noDC$SightCount2018
-# reg18_noDC <- dataTOTAL_noDC$RegCount2018
-# kdata <- dataTOTAL_noDC %>% select(SightCount2018, RegCount2018) %>%
-#   transmute('sight18/pop' = (sight18_noDC/dataTOTAL_noDC$Population*1000)) %>%
-#   mutate('reg18/pop' = (reg18_noDC/dataTOTAL_noDC$Population*1000))
-# kdata.standard <- data.frame(scale(kdata))
-# ggplot(kdata.standard, aes(reg18_noDC/dataTOTAL_noDC$Population*1000, sight18_noDC/dataTOTAL_noDC$Population*1000)) + geom_point() + geom_smooth()
-# cls <- kmeans(kdata.standard, 2)
-# kdata.standard$cluster <- as.character(cls$cluster)
-# ggplot(data = kdata.standard) + geom_point(mapping = aes(x = (reg18_noDC/dataTOTAL_noDC$Population*1000), y = (sight18_noDC/dataTOTAL_noDC$Population*1000), color=cluster))
-
-summary(lm(sight18 ~ reg18 + Med_Income + Population, data=dataTOTAL))
-
-summary(lm(sight18 ~ reg18 + Med_Income + Population +
-             zindex18 + Score, data=dataTOTAL))
-
-summary(glm(sight18 ~ reg18 + Med_Income + Population +
-             zindex18 + Score, family=poisson(), data=dataTOTAL))
+summary(glm(sight18 ~ reg18 + logpop + zindex18 + Score, family=poisson(), data=dataTOTAL))
 
 ```
 
-## playing around with clusters - paused
-```{r cluster2, include=FALSE}
-
-# kdata <- dataTOTAL %>% select(SightCount2018, RegCount2018) %>%
-#   transmute('sight18/pop' = (sight18/dataTOTAL$Population*1000)) %>%
-#   mutate('reg18/pop' = (reg18/dataTOTAL$Population*1000))
-# 
-# cls <- kmeans(kdata, 2)
-# kdata$cluster <- as.character(cls$cluster)
-# 
-# ggplot(data = kdata) + geom_point(mapping = aes(x = (reg18/dataTOTAL$Population*1000), y = (sight18/dataTOTAL$Population*1000), color=cluster))
-# 
-# ggplot(data=kdata) + geom_point(mapping = aes(x = (reg18/dataTOTAL$Population*1000), y = (sight18/dataTOTAL$Population*1000), color = cluster))
-# 
-# kdata <- dataTOTAL %>% select(Population, TotalRegs) %>%
-#   transmute('Population' = (dataTOTAL$Population*100000)) %>%
-#   mutate('TotalRegs' = (reg18/dataTOTAL$Population*1000))
-# 
-# cls <- kmeans(kdata, 3)
-# kdata$cluster <- as.character(cls$cluster)
-# 
-# ggplot(data=kdata) + geom_point(mapping = aes(x = (dataTOTAL$Population*1000), y = (reg18/dataTOTAL$Population*1000), color = cluster))
-
-```
-
-
-```{r test, include=FALSE}
-
-# ignore below: just testing stats
-
-# ggplot(data = dataTOTAL) +
-#   geom_point(mapping = aes(x=milrank, y=sight18, color = "red"))
-# 
-# ggplot(data = dataTOTAL) +
-#   geom_point(mapping = aes(x=(reg18/Med_Income), y=(sight18/Med_Income), color = "red"))
-# 
-# ggplot(data = dataTOTAL) +
-#   geom_point(mapping = aes(x=(reg18/Population)*1000, y=(sight18/Population)*1000, color = "red"))
-# 
-# summary(lm(sTotal ~ rTotal, data=dataTOTAL))
-
-# summary(lm(sTotal ~ rTotal + Med_Income + Population + zindex18, data=dataTOTAL))
-
-
-# cor(sight16, reg16)
-# cor(sight17, reg17)
-# cor(sight18, reg18)
-# 
-# summary(lm(sight16 ~ reg16, data=dataTOTAL))
-# summary(lm(sight17 ~ reg16, data=dataTOTAL))
-
-# ggplot(data = dataTOTAL) +
-#   geom_point(mapping = aes(x=reg16, y=sight16, color = "red")) +
-#   geom_point(mapping = aes(x=reg17, y=sight17, color = "blue")) +
-#   geom_point(mapping = aes(x=reg18, y=sight18, color = "green")) #+
-#   geom_smooth(mapping = aes(x = reg16, y= sight16)) +
-#   geom_smooth(mapping = aes(x = reg17, y= sight17)) +
-#   geom_smooth(mapping = aes(x = reg18, y= sight18))
-
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
-
-# References
-[@noauthor_foia_nodate]
 
 
